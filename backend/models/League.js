@@ -59,6 +59,7 @@ const leagueSchema = new mongoose.Schema({
             teamId: { type: mongoose.Schema.Types.ObjectId, ref: 'Team' },
             wins: { type: Number, default: 0 },
             losses: { type: Number, default: 0 },
+            ties: { type: Number, default: 0 },
             points: { type: Number, default: 0 }
         }
     ],

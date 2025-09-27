@@ -122,6 +122,40 @@ router.post('/:id/leave', async (req, res) => {
   }
 });
 
+router.get('/:id/schedule', async (req, res) => {
+  const leagueID = req.params.id
+  try {
+    const league = League.findById(leagueID);
+    
+    //if league not found
+    if (!league) return res.status(404).json({message: 'League not found' });
+    
+    res.status(200).json({message: 'Found league schedule', schedule : league.schedule});
+
+
+  } catch {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+router.get('/:id/score', async (req, res) => {
+  const leagueID = req.params.id
+  try {
+    const league = League.findById(leagueID);
+    
+    //if league not found
+    if (!league) return res.status(404).json({message: 'League not found' });
+    
+    res.status(200).json({message: 'Found league standings', standings : league.standings});
+
+  } catch {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
 module.exports = router;
 
 
