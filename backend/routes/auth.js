@@ -39,12 +39,10 @@ router.post('/signup', async (req, res) => {
 // Login route
 router.post('/login', async (req, res) => {
     try {
-        const { usernameOrEmail, password } = req.body;
+        const { email , password } = req.body;
 
         // Find user by username or email
-        const user = await User.findOne({
-            $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }]
-        });
+        const user = await User.findOne({ email });
 
         // If user doesn't exist
         if (!user) return res.status(400).json({ message: 'Invalid credentials' });
