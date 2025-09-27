@@ -3,11 +3,8 @@ const cors = require('cors');
 const app = express();
 app.use(express.json());
 require('dotenv').config();
-
-// enable cors for all routes and origins
 app.use(cors());
 
-// connect to mongoDB
 const connectDB = require('./config/db');
 connectDB();
 
@@ -20,23 +17,25 @@ app.get('/', (req, res) => {
   res.send('Server is alive!');
 });
 
-// import routes
+// Import routes
 const authRoutes = require('./routes/auth');
 const leagueRoutes = require('./routes/leagues');
 const draftingRoutes = require('./routes/drafting');
 const teamRoutes = require('./routes/teams');
 const matchupsRoutes = require('./routes/matchups');
 const playersRoutes = require('./routes/players');
+const geminiRoutes = require('./routes/gemini');
 
-// mount routes
+// Mount routes
 app.use('/api/auth', authRoutes);
 app.use('/api/leagues', leagueRoutes);
 app.use('/api/drafting', draftingRoutes);
 app.use('/api/teams', teamRoutes);
 app.use('/api/matchups', matchupsRoutes);
 app.use('/api/players', playersRoutes);
+app.use('/api/gemini', geminiRoutes);
 
-// start server
+// Start server
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

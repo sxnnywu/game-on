@@ -1,35 +1,44 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './GeminiWidget.css';
 
 const GeminiWidget = () => {
   const [expanded, setExpanded] = useState(false);
-  const [commentary, setCommentary] = useState('Loading commentary...');
+  const [commentary, setCommentary] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const toggleExpanded = () => setExpanded(!expanded);
+  const fetchCommentary = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:5001/api/gemini');
+      const data = await response.json();
+      setCommentary(data.commentary);
+    } catch (error) {
+      setCommentary('Failed to fetch commentary.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  useEffect(() => {
-    // Replace with your actual Gemini API call
-    const fetchGeminiCommentary = async () => {
-      try {
-        const response = await fetch('/api/gemini-commentary');
-        const data = await response.json();
-        setCommentary(data.commentary);
-      } catch (err) {
-        setCommentary('Unable to fetch commentary.');
-      }
-    };
-
-    fetchGeminiCommentary();
-  }, []);
+  const toggleExpanded = () => {
+    // If we're opening the commentary, fetch new data
+    if (!expanded) {
+      fetchCommentary();
+    }
+    setExpanded(!expanded);
+  };
 
   return (
-    <div className={`gemini-widget ${expanded ? 'expanded' : ''}`} onClick={toggleExpanded}>
-      <div className="gemini-header z-50">
-        🏒 AI Commentary
-      </div>
+    <div className={`gemini-fab-container ${expanded ? 'expanded' : ''}`}>
+      <button className="gemini-fab" onClick={toggleExpanded}>
+        🧠 <span className="fab-label">AI Commentary</span>
+      </button>
+
       {expanded && (
-        <div className="gemini-body">
-          <p>{commentary}</p>
+        <div className="gemini-commentary-box">
+          <div className="gemini-commentary-header">🏒 Recent Insights</div>
+          <div className="gemini-commentary-body">
+            {loading ? <p>Loading latest commentary...</p> : <p>{commentary}</p>}
+          </div>
         </div>
       )}
     </div>

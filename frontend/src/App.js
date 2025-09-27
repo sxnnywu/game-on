@@ -12,7 +12,7 @@ function App() {
         <Route path="/" element={<Auth/>} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/draft" element={<PlayerDraft/>}/>
-        <Route path="/*" element={<GeminiWidget/>} />
+        <Route path="/gemini" element={<GeminiWidget/>} />
       </Routes>
     </Router>
   );
