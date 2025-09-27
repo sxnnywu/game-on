@@ -12,6 +12,11 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+    },
     leagues: [
         {
             type: mongoose.Schema.Types.ObjectId,
@@ -25,3 +30,4 @@ const userSchema = new mongoose.Schema({
 });
 
 // export the model
+module.exports = mongoose.model('User', userSchema);
