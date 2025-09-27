@@ -39,7 +39,31 @@ router.post('/', async (req, res) => {
 });
 
 // Get all leagues a user is in
+router.get('/:id/leagues', async (req, res) => {
 
+  const userId = req.params.id;
+  try {
+
+    // Check if user exists
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Find leagues where user is either the creator or has a team in the league
+    const leagues = await League.find({
+      $or: [
+        { creatorId: user._id },
+        { teamIds: { $in: await Team.find({ ownerId: user._id }).distinct('_id') } }
+      ]
+    }).populate('creatorId').populate('teamIds');
+
+    // Return leagues
+    res.status(200).json({ leagues });
+  } 
+  catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 // Get league details
 router.get('/:id', async (req, res) => {
