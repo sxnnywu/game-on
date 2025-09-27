@@ -26,7 +26,7 @@ router.get('/', async (req, res) => {
 
     // Call Gemini API
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -57,7 +57,7 @@ router.get('/', async (req, res) => {
     console.log('Gemini API JSON parsed:', JSON.stringify(data).slice(0, 200) + '...'); // print first 200 chars
 
     // Extract commentary from response
-    const commentary = data.candidates?.[0]?.output || "No commentary available.";
+    const commentary = data.candidates?.[0]?.content?.parts?.[0]?.text || "No commentary available.";
     console.log('Extracted commentary:', commentary);
 
     // Send commentary back to client
