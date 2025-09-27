@@ -10,7 +10,7 @@ const User = require('../models/User');
 router.post('/signup', async (req, res) => {
     try {
         const { username, email, password } = req.body;
-
+        console.log(req.body);
         // Check if user exists
         const existingUser = await User.findOne({ $or: [{ username }, { email }] });
         if (existingUser)
