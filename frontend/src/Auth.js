@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import './Auth.css';
 import { Eye, EyeOff, Mail, Lock, User, Zap } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -12,6 +14,7 @@ const Auth = () => {
     username: ''
   });
   const [puckPosition, setPuckPosition] = useState(0);
+  const [error, setError] = useState('');
 
   // Animated puck movement
   useEffect(() => {
@@ -26,66 +29,80 @@ const Auth = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
+
+    // Clear error as user types
+    if (error) setError('');
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const API_URL = process.env.REACT_APP_API_URL;
-  console.log("🔎 API_URL from env:", API_URL);
+    const API_URL = process.env.REACT_APP_API_URL;
+    console.log("🔎 API_URL from env:", API_URL);
 
-  const endpoint = isLogin 
-    ? `${API_URL}/api/auth/login` 
-    : `${API_URL}/api/auth/signup`;
-  console.log("📡 Hitting endpoint:", endpoint);
+    const endpoint = isLogin 
+      ? `${API_URL}/api/auth/login` 
+      : `${API_URL}/api/auth/signup`;
+    console.log("📡 Hitting endpoint:", endpoint);
 
-  const payload = isLogin
-    ? { email: formData.email, password: formData.password }
-    : { email: formData.email, password: formData.password, username: formData.username };
-  console.log("📦 Payload being sent:", payload);
+    const payload = isLogin
+      ? { email: formData.email, password: formData.password }
+      : { email: formData.email, password: formData.password, username: formData.username };
+    console.log("📦 Payload being sent:", payload);
 
-  try {
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    console.log("📥 Raw response object:", response);
-    console.log("📌 Response status:", response.status);
-    console.log("📌 Response ok:", response.ok);
-
-    // Try reading the raw text first
-    const text = await response.text();
-    console.log("📄 Raw response text:", text);
-
-    // Then parse JSON safely
-    let data;
     try {
-      data = JSON.parse(text);
-      console.log("✅ Parsed response JSON:", data);
-    } catch (jsonErr) {
-      console.error("⚠️ Failed to parse JSON:", jsonErr);
-      return;
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      console.log("📥 Raw response object:", response);
+      console.log("📌 Response status:", response.status);
+      console.log("📌 Response ok:", response.ok);
+
+      const text = await response.text();
+      console.log("📄 Raw response text:", text);
+
+      let data;
+      try {
+        data = JSON.parse(text);
+        console.log("✅ Parsed response JSON:", data);
+      } catch (jsonErr) {
+        console.error("⚠️ Failed to parse JSON:", jsonErr);
+        return;
+      }
+
+      if (!response.ok) {
+        console.error("❌ Server error:", data.message || "Something went wrong");
+        setError(data.message || "Something went wrong"); // show error
+        return;
+      }
+
+      if (response.ok) {
+        setError('');
+        console.log("🎉 Success:", data);
+        // Save token if you have one
+        localStorage.setItem('token', data.token);
+        // Redirect to dashboard
+        navigate('/dashboard');
+      }
+
+      // On success, clear the error
+      setError('');
+      console.log("🎉 Success:", data);
+      // localStorage.setItem('token', data.token);
+      // navigate('/dashboard');
+
+    } catch (error) {
+      console.error("🌐 Network error:", error);
     }
-
-    if (!response.ok) {
-      console.error("❌ Server error:", data.message || "Something went wrong");
-      return;
-    }
-
-    console.log("🎉 Success:", data);
-    // localStorage.setItem('token', data.token);
-    // navigate('/dashboard');
-
-  } catch (error) {
-    console.error("🌐 Network error:", error);
-  }
-};
+  };
 
   const switchMode = () => {
     setIsLogin(!isLogin);
     setFormData({ email: '', password: '', confirmPassword: '', username: '' });
+    setError('');
   };
 
   return (
@@ -93,15 +110,10 @@ const handleSubmit = async (e) => {
 
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
-        {/* Ice rink lines */}
         <div className="absolute top-1/4 left-0 w-full h-px bg-white opacity-10 transform rotate-12"></div>
         <div className="absolute top-3/4 left-0 w-full h-px bg-white opacity-10 transform -rotate-12"></div>
-
-        {/* Floating pucks */}
         <div className="absolute top-20 left-20 w-8 h-8 bg-white rounded-full opacity-5 animate-bounce"></div>
         <div className="absolute bottom-32 right-32 w-6 h-6 bg-white rounded-full opacity-5 animate-ping"></div>
-
-        {/* Moving puck */}
         <div
           className="absolute top-1/3 w-4 h-4 bg-white rounded-full opacity-20 transition-all duration-100"
           style={{ left: `${puckPosition}%` }}
@@ -135,7 +147,6 @@ const handleSubmit = async (e) => {
         {/* Right Side - Auth Form */}
         <div className="w-full max-w-md mx-auto lg:mx-0 lg:ml-auto">
 
-          {/* Auth Card */}
           <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20 transform transition-all duration-500 hover:scale-105">
 
             {/* Toggle Buttons */}
@@ -166,7 +177,9 @@ const handleSubmit = async (e) => {
               {/* Username (Sign Up only) */}
               {!isLogin && (
                 <div className="relative group animate-slide-up">
-                  <User className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-purple-300 group-hover:text-white transition-colors" />
+                  <div className="absolute left-4 top-5 w-5 h-5 text-purple-300 group-hover:text-white transition-colors">
+                    <User className="w-5 h-5" />
+                  </div>
                   <input
                     type="text"
                     name="username"
@@ -177,6 +190,9 @@ const handleSubmit = async (e) => {
                     required
                   />
                   <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-purple-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+
+                  {/* Error message placeholder */}
+                  <p className="text-white text-sm mt-1 min-h-[1rem]">{error}</p>
                 </div>
               )}
 

@@ -1,12 +1,15 @@
-import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Auth from './Auth';
-import './App.css';      
+import Dashboard from './Dashboard';
 
 function App() {
   return (
-    <div>
-      <Auth />
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Auth />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+      </Routes>
+    </Router>
   );
 }
 
