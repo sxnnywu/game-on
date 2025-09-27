@@ -23,9 +23,13 @@ const PlayerDraft = () => {
     const fetchPlayers = async () => {
       try {
         setLoading(true);
-        const response = await fetch("http://localhost:5001/api/players");
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/players`);
+        
         if (!response.ok) throw new Error("Failed to fetch players");
+        
         const data = await response.json();
+        let player = JSON.parse(data)
+        
         setPlayers(data);
         setError(null);
       } catch (err) {
