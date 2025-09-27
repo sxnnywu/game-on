@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Auth.css';
 import { Eye, EyeOff, Mail, Lock, User, Zap } from 'lucide-react';
+import PlayerDraft from '../PlayerDraft/PlayerDraft';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -31,6 +32,7 @@ const Auth = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log(isLogin ? 'Login' : 'Sign Up', formData);
+    <PlayerDraft/>
   };
 
   const switchMode = () => {
@@ -78,7 +80,7 @@ const Auth = () => {
             Women's Hockey. Reimagined.
           </p>
           <p className="text-purple-300 text-lg lg:text-xl max-w-lg mx-auto lg:mx-0">
-            Build your ultimate team, compete with friends, and dominate the ice in the most exciting fantasy hockey experience.
+            Build your ultimate team, compete with friends, and dominate the ice in an exciting fantasy hockey experience.
           </p>
         </div>
 
