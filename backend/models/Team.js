@@ -2,6 +2,10 @@ const mongoose = require('mongoose');
 
 // define schema
 const teamSchema = new mongoose.Schema({
+    _id: {
+        type: Integer,
+        required: true
+    },
     ownerId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',

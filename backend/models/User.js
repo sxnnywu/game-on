@@ -2,6 +2,10 @@ const mongoose = require('mongoose');
 
 // define schema
 const userSchema = new mongoose.Schema({
+    _id: {
+        type: Integer,
+        required: true
+    },
     username: {
         type: String,
         required: true,
@@ -17,12 +21,11 @@ const userSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
-    leagues: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'League'
-        }
-    ],
+    league: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'League',
+        default: null
+    },
     createdAt: {
         type: Date,
         default: Date.now

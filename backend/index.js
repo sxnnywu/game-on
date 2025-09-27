@@ -1,7 +1,11 @@
 const express = require('express');
+const cors = require('cors');
 const app = express();
 app.use(express.json());
 require('dotenv').config();
+
+// enable cors for all routes and origins
+app.use(cors());
 
 // connect to mongoDB
 const connectDB = require('./config/db');
@@ -18,9 +22,15 @@ app.get('/', (req, res) => {
 
 // import routes
 const authRoutes = require('./routes/auth');
+const leagueRoutes = require('./routes/leagues');
+const teamRoutes = require('./routes/teams');
+const matchupsRoutes = require('./routes/matchups');
 
 // mount routes
 app.use('/api/auth', authRoutes);
+app.use('/api/leagues', leagueRoutes);
+app.use('/api/teams', teamRoutes);
+app.use('/api/matchups', matchupsRoutes);
 
 // start server
 const PORT = process.env.PORT || 5001;
