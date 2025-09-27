@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
+// get team roster
 router.get('/:id', async (req, res) => {
     const {userID, leagueID} = req.query;
 
@@ -22,6 +23,7 @@ router.get('/:id', async (req, res) => {
     }
 })
 
+// update starting lineup
 router.post('/:id/lineup', async (req, res) => {
     const { userID, leagueID, players} = req.body
 
