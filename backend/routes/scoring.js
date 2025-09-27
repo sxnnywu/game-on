@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
-import { db } from '../models/Player';
-import Team from '../models/Team';
-import '/models/Player.js'
+
+// models
+const League = require('../models/League');
+const Team = require('../models/Team');
+const Matchup = require('../models/Matchup');
 
 //update scoring
 router.post('/update', async (req, res) => {
@@ -13,7 +15,7 @@ router.post('/update', async (req, res) => {
         oneWeekAgo.setDate(currentDate.getDate() - 7);
 
         //clear 'this week' player stats
-        Player.updateMany({status: true}, {statsFromThisWeek: null})
+        await Player.updateMany({status: true}, {statsFromThisWeek: null})
 
         //get pdub schedule
         const url = 'https://lscluster.hockeytech.com/feed/?feed=modulekit&view=schedule&season_id=5&key=446521baf8c38984&client_code=pwhl';
@@ -31,6 +33,7 @@ router.post('/update', async (req, res) => {
         }
 
         const filteredSchedule = scheduleCall.SiteKit.Schedule.filter(item => {
+            if(!item?.date) return false;
             const itemDate = new Date(item.date);
             return itemDate >= oneWeekAgo && itemDate <= currentDate;
         });
@@ -78,7 +81,7 @@ router.post('/update', async (req, res) => {
         await Promise.all(playerUpdatePromises)
 
         //get this week's matchups
-        League.updateMany({$inc: {week : 1}})
+        let leagues = await League.updateMany({$inc: {week : 1}})
         let week = League.findOne().week;
         const matchups = Matchup.find({week: week}); //VARIABLE WEEK
 
@@ -106,10 +109,46 @@ router.post('/update', async (req, res) => {
                     scoreB += p.statsFromThisWeek?.saves || 0;
                 });
 
-                await Matchup.updateOne({ _id: match._id }, { $set: { scoreA, scoreB } });
-            })
+                await match.updateOne({ _id: match._id }, { $set: {scoreA: scoreA, scoreB: scoreB, status: 'finished'}});
 
+                const league = League.findOne({_id: teamA.leagueID});
+                
+                if (!league) return res.status(400).json({ error: `Could not find league for team ${teamAID}` });
+
+                if(scoreA > scoreB) {
+                    let teamStandingsUpdate = league.standings.findOne({teamId: teamAId});
+                    teamStandingsUpdate.wins++;
+                    teamStandingsUpdate.points += 2;
+
+                    teamStandingsUpdate = league.standings.findOne({teamId: teamBId});
+                    teamStandingsUpdate.losses++;
+                } else if (scoreA < scoreB) {
+                    let teamStandingsUpdate = league.standings.findOne({teamId: teamBId});
+                    teamStandingsUpdate.wins++;
+                    teamStandingsUpdate.points += 2;
+
+                    teamStandingsUpdate = league.standings.findOne({teamId: teamAId});
+                    teamStandingsUpdate.losses++;
+                } else {
+                    let teamStandingsUpdate = league.standings.findOne({teamId: teamAId});
+                    teamStandingsUpdate.ties++;
+                    teamStandingsUpdate.points++;
+
+                    teamStandingsUpdate = league.standings.findOne({teamId: teamAId});
+                    teamStandingsUpdate.ties++;
+                    teamStandingsUpdate.points++;
+                }
+
+                await league.save();
+
+            })
         );
+
+        leagues.forEach(async league => {
+            league.standings.sort((a, b) => b.points - a.points);
+
+            await league.save();
+        })
 
         //return
         res.status(200).json({message: 'Scores updates successfully', matchups});
