@@ -31,7 +31,7 @@ router.post('/:id/lineup', async (req, res) => {
 
     try {
         const team = await Team.findOneAndUpdate(
-            { userId, leagueId },
+            { userID, leagueID },
             { players: players },
             { new: true }
         );
