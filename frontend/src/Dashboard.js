@@ -110,7 +110,7 @@ const Dashboard = () => {
               </div>
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">GAME<span className="text-purple-300">ON</span></h1>
+              <h1 className="text-2xl font-bold text-white">PUCK<span className="text-purple-300">YEAH</span></h1>
               <p className="text-purple-200 text-sm">Welcome back, User!</p>
             </div>
           </div>
