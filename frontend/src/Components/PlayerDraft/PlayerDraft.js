@@ -16,7 +16,7 @@ const PlayerDraft = () => {
   const [players, setPlayers] = useState([]);
 
   useEffect(() => {
-    fetch("..backend/routes/players")
+    fetch("http://localhost:5001/routes/players")
       .then((res) => res.json())
       .then((data) => setPlayers(data))
       .catch((err) => console.error(err));
