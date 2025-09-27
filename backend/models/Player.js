@@ -8,7 +8,7 @@ const playerSchema = new mongoose.Schema({
         trim: true
     },
     pwhlSystemID: {
-        type: Integer,
+        type: Number,
         required: true,
         default: 0
     },
