@@ -16,8 +16,7 @@ router.get('/', async (req, res) => {
   console.log('Received request to /api/gemini');
 
   const promptText = `
-    Provide the latest PWHL women's hockey news, recent plays, and fantasy hockey league relevant stats.
-    Focus on recent games and standout players.
+    Say Hello!
   `;
   console.log('Prompt text prepared');
 
@@ -26,7 +25,7 @@ router.get('/', async (req, res) => {
 
     // Call Gemini API
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -38,7 +37,7 @@ router.get('/', async (req, res) => {
           ],
           generationConfig: {
             temperature: 0.7,
-            maxOutputTokens: 256,
+            maxOutputTokens: 1000,
           }
         }),
       }
@@ -54,10 +53,10 @@ router.get('/', async (req, res) => {
 
     // Parse JSON response
     const data = await response.json();
-    console.log('Gemini API JSON parsed:', JSON.stringify(data).slice(0, 200) + '...'); // print first 200 chars
+    console.log('Gemini API JSON parsed:', JSON.stringify(data)); // print first 200 chars
 
     // Extract commentary from response
-    const commentary = data.candidates?.[0]?.content?.parts?.[0]?.text || "No commentary available.";
+    const commentary = data.candidates[0].content.parts || "No commentary available.";
     console.log('Extracted commentary:', commentary);
 
     // Send commentary back to client
@@ -65,7 +64,7 @@ router.get('/', async (req, res) => {
   }
   catch (error) {
     console.error('Fetch error caught:', error);
-    res.status(500).json({ commentary: "Error fetching commentary." });
+    res.status(500).json({ commentary: "Error fetching commentary.", error: error });
   }
 });
 
