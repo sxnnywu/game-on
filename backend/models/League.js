@@ -31,7 +31,7 @@ const leagueSchema = new mongoose.Schema({
         type: String,
         enum: ['User', 'Team']
     },
-    round: {
+    week: {
         type: Number,
         default: 1
     },
