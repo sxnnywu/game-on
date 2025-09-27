@@ -79,6 +79,8 @@ const handleSubmit = async (e) => {
     // localStorage.setItem('token', data.token);
     // navigate('/dashboard');
 
+    <PlayerDraft/>
+
   } catch (error) {
     console.error("🌐 Network error:", error);
   }
