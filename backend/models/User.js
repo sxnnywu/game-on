@@ -17,11 +17,12 @@ const userSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
-    league: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'League',
-        default: null
-    },
+    leagues: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'League'
+        }
+    ],
     createdAt: {
         type: Date,
         default: Date.now
