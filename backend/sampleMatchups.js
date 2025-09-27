@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Matchup = require('../models/Matchup'); // adjust path if needed
+const Matchup = require('./models/Matchup'); // adjust path if needed
 require('dotenv').config(); // make sure MONGO_URI is in your .env
 
 async function seedMatchups() {
@@ -18,7 +18,7 @@ async function seedMatchups() {
         teamBId: new mongoose.Types.ObjectId("68d75663c8286889f4abe097"),
         scoreA: 10,
         scoreB: 12,
-        status: "scheduled",
+        status: "upcoming",
         createdAt: new Date()
       },
       {
@@ -28,7 +28,7 @@ async function seedMatchups() {
         teamBId: new mongoose.Types.ObjectId("68d75663c8286889f4abe099"),
         scoreA: 7,
         scoreB: 7,
-        status: "scheduled",
+        status: "upcoming",
         createdAt: new Date()
       }
     ];

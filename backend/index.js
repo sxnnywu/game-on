@@ -28,7 +28,7 @@ const matchupsRoutes = require('./routes/matchups');
 const playersRoutes = require('./routes/players');
 
 // mount routes
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authRoutxes);
 app.use('/api/leagues', leagueRoutes);
 app.use('/api/teams', teamRoutes);
 app.use('/api/matchups', matchupsRoutes);
