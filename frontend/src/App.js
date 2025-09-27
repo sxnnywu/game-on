@@ -7,7 +7,11 @@ import GeminiWidget from './Components/GeminiWidget/GeminiWidget';
 
 function App() {
   return (
-    <Router>
+
+    <>
+      <GeminiWidget/>
+
+          <Router>
       <Routes>
         <Route path="/" element={<Auth/>} />
         <Route path="/dashboard" element={<Dashboard />} />
@@ -15,6 +19,7 @@ function App() {
         <Route path="/gemini" element={<GeminiWidget/>} />
       </Routes>
     </Router>
+    </>
   );
 }
 
