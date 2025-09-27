@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Zap } from "lucide-react";
 
 const PlayerDraft = () => {
@@ -13,11 +13,14 @@ const PlayerDraft = () => {
     "/assets/icon8.png",
   ];
 
-  const players = [
-    { name: "Player 1", team: "Team A", position: "Forward", draft: "Drafted", goals: 5, assists: 3, saves: 0 },
-    { name: "Player 2", team: "Team B", position: "Goalie", draft: "Available", goals: 0, assists: 1, saves: 15 },
-    { name: "Player 3", team: "Team C", position: "Defense", draft: "Drafted", goals: 2, assists: 4, saves: 0 },
-  ];
+  const [players, setPlayers] = useState([]);
+
+  useEffect(() => {
+    fetch("..backend/routes/players")
+      .then((res) => res.json())
+      .then((data) => setPlayers(data))
+      .catch((err) => console.error(err));
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 flex flex-col p-6">
@@ -45,32 +48,52 @@ const PlayerDraft = () => {
 
         {/* Player table */}
         <div className="flex-1 bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-6 overflow-auto max-h-[600px]">
-          <table className="w-full text-left text-white border-collapse">
-            <thead>
-              <tr className="bg-white/10 text-purple-200 sticky top-0">
-                <th className="px-4 py-2">Name</th>
-                <th className="px-4 py-2">Team</th>
-                <th className="px-4 py-2">Position</th>
-                <th className="px-4 py-2">Draft Status</th>
-                <th className="px-4 py-2">Goals</th>
-                <th className="px-4 py-2">Assists</th>
-                <th className="px-4 py-2">Saves</th>
-              </tr>
-            </thead>
-            <tbody>
-              {players.map((player, idx) => (
-                <tr key={idx} className="odd:bg-white/5 even:bg-white/0 hover:bg-purple-700/30 transition">
-                  <td className="px-4 py-2">{player.name}</td>
-                  <td className="px-4 py-2">{player.team}</td>
-                  <td className="px-4 py-2">{player.position}</td>
-                  <td className="px-4 py-2">{player.draft}</td>
-                  <td className="px-4 py-2">{player.goals}</td>
-                  <td className="px-4 py-2">{player.assists}</td>
-                  <td className="px-4 py-2">{player.saves}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <table className="table-auto border-collapse border border-gray-300 w-full">
+  <thead>
+    <tr>
+      <th className="px-4 py-2 border">Name</th>
+      <th className="px-4 py-2 border">Team</th>
+      <th className="px-4 py-2 border">Position</th>
+      <th className="px-4 py-2 border">Status</th>
+      <th className="px-4 py-2 border">Draft Status</th>
+      <th className="px-4 py-2 border">Goals (This Week)</th>
+      <th className="px-4 py-2 border">Assists (This Week)</th>
+      <th className="px-4 py-2 border">Saves (This Week)</th>
+      <th className="px-4 py-2 border">Total Goals</th>
+      <th className="px-4 py-2 border">Total Assists</th>
+      <th className="px-4 py-2 border">Total Saves</th>
+      <th className="px-4 py-2 border">Created At</th>
+    </tr>
+  </thead>
+  <tbody>
+    {players.map((player) => (
+      <tr key={player._id}>
+        <td className="px-4 py-2 border">{player.name}</td>
+        <td className="px-4 py-2 border">{player.team}</td>
+        <td className="px-4 py-2 border">{player.position}</td>
+        <td className="px-4 py-2 border">
+          {player.status ? "Active" : "Inactive"}
+        </td>
+        <td className="px-4 py-2 border">{player.draftStatus}</td>
+
+        {/* Weekly stats */}
+        <td className="px-4 py-2 border">{player.statsFromThisWeek?.goals}</td>
+        <td className="px-4 py-2 border">{player.statsFromThisWeek?.assists}</td>
+        <td className="px-4 py-2 border">{player.statsFromThisWeek?.saves}</td>
+
+        {/* Total stats */}
+        <td className="px-4 py-2 border">{player.stats?.goals}</td>
+        <td className="px-4 py-2 border">{player.stats?.assists}</td>
+        <td className="px-4 py-2 border">{player.stats?.saves}</td>
+
+        <td className="px-4 py-2 border">
+          {new Date(player.createdAt).toLocaleDateString()}
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
         </div>
       </div>
 
