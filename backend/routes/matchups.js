@@ -4,6 +4,7 @@ const Matchup = require('../models/Matchup');
 
 // Get matchup by ID
 router.get('/:id', async (req, res) => {
+    console.log("Received request for matchup ID");
     const matchID = req.params.id;
     console.log("Fetching matchup with ID:", matchID);
     if (!matchID) {
