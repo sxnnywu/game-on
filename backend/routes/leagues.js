@@ -122,45 +122,6 @@ router.post('/:id/leave', async (req, res) => {
   }
 });
 
-// Get draft state
-router.get('/:id/draft', async (req, res) => {
-  const leagueId = req.params.id;
-
-    // if no leagueId provided
-    if (!leagueId) 
-        return res.status(400).json({ error: 'Missing league ID' });
-
-    try {
-        // find league and populate necessary fields
-        const league = await League.findById(leagueId)
-            .populate('currentTurn')
-            .populate('draftedPlayers.playerId')
-            .populate('draftedPlayers.teamId')
-            .populate('playerPool');
-
-        // if league not found
-        if (!league) 
-            return res.status(404).json({ error: 'League not found' });
-
-        // return draft state
-        res.status(200).json({
-            draftStatus: league.draftStatus,
-            currentTurn: league.currentTurn,
-            round: league.round,
-            draftedPlayers: league.draftedPlayers.map(dp => ({
-                player: dp.playerId,
-                team: dp.teamId,
-                pickOrder: dp.pickOrder
-            })),
-            remainingPlayerPool: league.playerPool,
-        });
-    } 
-    catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
 module.exports = router;
 
 
