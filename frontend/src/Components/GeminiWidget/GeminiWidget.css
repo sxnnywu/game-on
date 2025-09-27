@@ -1,0 +1,33 @@
+.gemini-widget {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #0a1a40; /* Dark navy */
+  color: white;
+  border-radius: 0 0 8px 8px;
+  padding: 10px 20px;
+  z-index: 9999;
+  cursor: pointer;
+  width: fit-content;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  font-family: 'Arial', sans-serif;
+}
+
+.gemini-widget:hover {
+  background-color: #162a60;
+}
+
+.gemini-header {
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.gemini-body {
+  margin-top: 10px;
+  max-width: 300px;
+  color: #e0e0ff;
+  border-top: 1px solid #a86de8; /* Purple accent */
+  padding-top: 8px;
+}
