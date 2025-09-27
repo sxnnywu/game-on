@@ -6,7 +6,7 @@ const Player = require('../models/Player');
 // Get all players
 router.get('/', async (req, res) => {
   try {
-    const players = await Player.find();
+    const players = await Player.find({status: true});
     res.json(players);
   } catch (err) {
     console.error('Error fetching players:', err);
