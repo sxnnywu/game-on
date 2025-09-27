@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Player = require('../models/Player');
 
+// Get all players
 router.get('/', async (req, res) => {
   try {
     const players = await Player.find();
