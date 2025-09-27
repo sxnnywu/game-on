@@ -1,21 +1,29 @@
-// import express
 const express = require('express');
-
-// import dotenv
+const app = express();
+app.use(express.json());
 require('dotenv').config();
 
 // connect to mongoDB
 const connectDB = require('./config/db');
 connectDB();
 
-// use middleware
-const app = express();
-app.use(express.json());
+app.use((req, res, next) => {
+  console.log(`Incoming request: ${req.method} ${req.url}`);
+  next();
+});
 
-// ROUTES
+app.get('/', (req, res) => {
+  res.send('Server is alive!');
+});
+
+// import routes
+const authRoutes = require('./routes/auth');
+
+// mount routes
+app.use('/api/auth', authRoutes);
 
 // start server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
