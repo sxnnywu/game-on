@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 
 router.get('/:id', async (req, res) => {
-    const {userID, leagueID} = req.query;
+    const {leagueID} = req.query;
+    const userID = req.params.id;
 
     if (!userID || !leagueID) {
         return res.status(400).json({ error: 'Missing userID or leagueID' });
