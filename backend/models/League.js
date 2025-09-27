@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 // define schema
 const leagueSchema = new mongoose.Schema({
-     name: {
+    name: {
         type: String,
         required: true,
         trim: true

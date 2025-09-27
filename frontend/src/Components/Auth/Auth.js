@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import './Auth.css';
 import { Eye, EyeOff, Mail, Lock, User, Zap } from 'lucide-react';
+<<<<<<< HEAD:frontend/src/Auth.js
 import { useNavigate } from 'react-router-dom';
+=======
+import PlayerDraft from '../PlayerDraft/PlayerDraft';
+>>>>>>> c171f1aa304691de05cc344d0cbdb2a71bf97cf8:frontend/src/Components/Auth/Auth.js
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -97,7 +101,26 @@ const Auth = () => {
     } catch (error) {
       console.error("🌐 Network error:", error);
     }
+<<<<<<< HEAD:frontend/src/Auth.js
   };
+=======
+
+    if (!response.ok) {
+      console.error("❌ Server error:", data.message || "Something went wrong");
+      return;
+    }
+
+    console.log("🎉 Success:", data);
+    // localStorage.setItem('token', data.token);
+    // navigate('/dashboard');
+
+    <PlayerDraft/>
+
+  } catch (error) {
+    console.error("🌐 Network error:", error);
+  }
+};
+>>>>>>> c171f1aa304691de05cc344d0cbdb2a71bf97cf8:frontend/src/Components/Auth/Auth.js
 
   const switchMode = () => {
     setIsLogin(!isLogin);
@@ -140,7 +163,7 @@ const Auth = () => {
             Women's Hockey. Reimagined.
           </p>
           <p className="text-purple-300 text-lg lg:text-xl max-w-lg mx-auto lg:mx-0">
-            Build your ultimate team, compete with friends, and dominate the ice in the most exciting fantasy hockey experience.
+            Build your ultimate team, compete with friends, and dominate the ice in an exciting fantasy hockey experience.
           </p>
         </div>
 

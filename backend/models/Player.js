@@ -17,6 +17,17 @@ const playerSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
+    status: {
+        type: Boolean,
+        required: true,
+        default: true
+    },
+    statsFromThisWeek: {
+        goals: { type: Number, default: 0 },
+        assists: { type: Number, default: 0 },
+        saves: { type: Number, default: 0 },
+        // we can add more stats as needed
+    },
     stats: {
         goals: { type: Number, default: 0 },
         assists: { type: Number, default: 0 },
