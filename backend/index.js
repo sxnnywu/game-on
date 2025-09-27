@@ -2,6 +2,8 @@
 const express = require('express');
 
 // connect to mongoDB
+const connectDB = require('./config/db');
+connectDB();
 
 // use middleware
 const app = express();
