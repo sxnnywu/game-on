@@ -31,10 +31,15 @@ router.get('/', async (req, res) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          prompt: { text: promptText },
-          temperature: 0.7,
-          candidateCount: 1,
-          maxOutputTokens: 256,
+          contents: [
+            {
+              parts: [{ text: promptText }]
+            }
+          ],
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 256,
+          }
         }),
       }
     );
@@ -57,7 +62,7 @@ router.get('/', async (req, res) => {
 
     // Send commentary back to client
     res.json({ commentary });
-  } 
+  }
   catch (error) {
     console.error('Fetch error caught:', error);
     res.status(500).json({ commentary: "Error fetching commentary." });
