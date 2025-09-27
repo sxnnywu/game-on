@@ -1,40 +1,45 @@
 const express = require('express');
 const router = express.Router();
 
+// import models
+const Team = require('../models/Team');
+
 // get team roster
 router.get('/:id', async (req, res) => {
-    const {userID, leagueID} = req.query;
+    const { userId, leagueId } = req.query;
 
-    if (!userID || !leagueID) {
-        return res.status(400).json({ error: 'Missing userID or leagueID' });
+    console.log("Fetching team for user:", userId, "in league:", leagueId);
+
+    if (!userId || !leagueId) {
+        return res.status(400).json({ error: 'Missing userId or leagueId' });
     }
 
     try {
-        const team = await Team.findOne({userID, leagueID});
+        const team = await Team.findOne({ _id: req.params.id, ownerId: userId, leagueId: leagueId });
 
         if(!team) {
             return res.status(404).json({ error: 'Team not found' });
         }
 
-        res.status(200).json({players: team.players});
+        res.status(200).json({ players: team.roster });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Server error' });
     }
-})
+});
 
 // update starting lineup
 router.post('/:id/lineup', async (req, res) => {
-    const { userID, leagueID, players} = req.body
+    const { userId, leagueId, players } = req.body;
 
-    if (!userID || !leagueID || !Array.isArray(players)) {
+    if (!userId || !leagueId || !Array.isArray(players)) {
         return res.status(400).json({ error: 'Invalid input data' });
     }
 
     try {
         const team = await Team.findOneAndUpdate(
-            { userID, leagueID },
-            { players: players },
+            { _id: req.params.id, ownerId: userId, leagueId: leagueId },
+            { lineup: players },
             { new: true }
         );
 
@@ -44,9 +49,9 @@ router.post('/:id/lineup', async (req, res) => {
 
         res.status(200).json({ message: 'Players replaced successfully', team });
     } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
     }
+});
 
-
-})
+module.exports = router;
