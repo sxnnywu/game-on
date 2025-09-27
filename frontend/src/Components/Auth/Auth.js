@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Auth.css';
 import { Eye, EyeOff, Mail, Lock, User, Zap } from 'lucide-react';
-<<<<<<< HEAD:frontend/src/Auth.js
 import { useNavigate } from 'react-router-dom';
-=======
-import PlayerDraft from '../PlayerDraft/PlayerDraft';
->>>>>>> c171f1aa304691de05cc344d0cbdb2a71bf97cf8:frontend/src/Components/Auth/Auth.js
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -33,8 +29,6 @@ const Auth = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
-
-    // Clear error as user types
     if (error) setError('');
   };
 
@@ -42,17 +36,13 @@ const Auth = () => {
     e.preventDefault();
 
     const API_URL = process.env.REACT_APP_API_URL;
-    console.log("🔎 API_URL from env:", API_URL);
-
     const endpoint = isLogin 
       ? `${API_URL}/api/auth/login` 
       : `${API_URL}/api/auth/signup`;
-    console.log("📡 Hitting endpoint:", endpoint);
 
     const payload = isLogin
       ? { email: formData.email, password: formData.password }
       : { email: formData.email, password: formData.password, username: formData.username };
-    console.log("📦 Payload being sent:", payload);
 
     try {
       const response = await fetch(endpoint, {
@@ -61,66 +51,28 @@ const Auth = () => {
         body: JSON.stringify(payload)
       });
 
-      console.log("📥 Raw response object:", response);
-      console.log("📌 Response status:", response.status);
-      console.log("📌 Response ok:", response.ok);
-
       const text = await response.text();
-      console.log("📄 Raw response text:", text);
-
       let data;
       try {
         data = JSON.parse(text);
-        console.log("✅ Parsed response JSON:", data);
       } catch (jsonErr) {
-        console.error("⚠️ Failed to parse JSON:", jsonErr);
+        console.error("Failed to parse JSON:", jsonErr);
         return;
       }
 
       if (!response.ok) {
-        console.error("❌ Server error:", data.message || "Something went wrong");
-        setError(data.message || "Something went wrong"); // show error
+        setError(data.message || "Something went wrong");
         return;
       }
 
-      if (response.ok) {
-        setError('');
-        console.log("🎉 Success:", data);
-        // Save token if you have one
-        localStorage.setItem('token', data.token);
-        // Redirect to dashboard
-        navigate('/dashboard');
-      }
-
-      // On success, clear the error
       setError('');
-      console.log("🎉 Success:", data);
-      // localStorage.setItem('token', data.token);
-      // navigate('/dashboard');
+      localStorage.setItem('token', data.token);
+      navigate('/dashboard');
 
     } catch (error) {
-      console.error("🌐 Network error:", error);
+      console.error("Network error:", error);
     }
-<<<<<<< HEAD:frontend/src/Auth.js
   };
-=======
-
-    if (!response.ok) {
-      console.error("❌ Server error:", data.message || "Something went wrong");
-      return;
-    }
-
-    console.log("🎉 Success:", data);
-    // localStorage.setItem('token', data.token);
-    // navigate('/dashboard');
-
-    <PlayerDraft/>
-
-  } catch (error) {
-    console.error("🌐 Network error:", error);
-  }
-};
->>>>>>> c171f1aa304691de05cc344d0cbdb2a71bf97cf8:frontend/src/Components/Auth/Auth.js
 
   const switchMode = () => {
     setIsLogin(!isLogin);
