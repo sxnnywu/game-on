@@ -18,9 +18,11 @@ app.get('/', (req, res) => {
 
 // import routes
 const authRoutes = require('./routes/auth');
+const leagueRoutes = require('./routes/leagues');
 
 // mount routes
 app.use('/api/auth', authRoutes);
+app.use('/api/leagues', leagueRoutes);
 
 // start server
 const PORT = process.env.PORT || 5001;
