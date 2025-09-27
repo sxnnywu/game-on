@@ -3,6 +3,7 @@ const router = express.Router();
 const Player = require('../models/Player');
 
 // GET /api/players
+// Get all players
 router.get('/', async (req, res) => {
   try {
     const players = await Player.find();
