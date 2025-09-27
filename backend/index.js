@@ -24,11 +24,13 @@ app.get('/', (req, res) => {
 const authRoutes = require('./routes/auth');
 const leagueRoutes = require('./routes/leagues');
 const teamRoutes = require('./routes/teams');
+const matchupsRoutes = require('./routes/matchups');
 
 // mount routes
 app.use('/api/auth', authRoutes);
 app.use('/api/leagues', leagueRoutes);
 app.use('/api/teams', teamRoutes);
+app.use('/api/matchups', matchupsRoutes);
 
 // start server
 const PORT = process.env.PORT || 5001;
