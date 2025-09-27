@@ -1,8 +1,13 @@
+import { jwtDecode } from 'jwt-decode';
 import React, { useState, useEffect } from 'react';
 import { Users, Trophy, Plus, Copy, Share2, Crown, Calendar, Target, Zap, Settings, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
+  const [currentUser, setCurrentUser] = useState(null);
+  const [token, setToken] = useState(null);
   const [puckPosition, setPuckPosition] = useState(0);
+  const [leagueName, setLeagueName] = useState('');
   const [showCreateLeague, setShowCreateLeague] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [leagueCode, setLeagueCode] = useState('');
@@ -13,6 +18,14 @@ const Dashboard = () => {
   const [showLeagueDetails, setShowLeagueDetails] = useState(false);
   const [selectedLeague, setSelectedLeague] = useState(null);
   const [joinCode, setJoinCode] = useState('');
+  const navigate = useNavigate();
+
+    const generateLeagueCode = () => {
+    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const link = `https://puckyeah.com/join/${code}`;
+    setLeagueCode(code);
+    setInviteLink(link);
+  };
 
   // Animated puck movement
   useEffect(() => {
@@ -22,38 +35,79 @@ const Dashboard = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const generateLeagueCode = () => {
-    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-    const link = `https://puckyeah.com/join/${code}`;
-    setLeagueCode(code);
-    setInviteLink(link);
-    return { code, link };
-  };
-
-  const createLeague = () => {
-    const { code, link } = generateLeagueCode();
-    setShowCreateLeague(false);
-    setShowInviteModal(true);
-  };
-
-  const joinLeague = () => {
-    if (joinCode.trim()) {
-      console.log('Joining league with code:', joinCode);
-      setJoinCode('');
-      setShowJoinLeague(false);
-      // TODO: Add logic to actually join the league in DB
+useEffect(() => {
+  const storedToken = localStorage.getItem('token');
+  if (storedToken) {
+    try {
+      const decoded = jwtDecode(storedToken);
+      setCurrentUser(decoded); // { id: "...", username: "..." }
+      setToken(storedToken);   // save token to state so other functions can access it
+    } catch (err) {
+      console.error("Invalid token", err);
     }
+  }
+}, []);
+
+const createLeague = () => {
+  if (!leagueName.trim() || !currentUser) return;
+
+  generateLeagueCode(); // this updates leagueCode + inviteLink in state
+  setShowCreateLeague(false);
+  setShowInviteModal(true);
+
+  const leagueData = {
+    name: leagueName,
+    creatorId: currentUser.id,
+    code: leagueCode,     // grab from state if you need to save
+    link: inviteLink
   };
+
+  createLeagueInDB(leagueData);
+};
+
+const joinLeague = async () => {
+  if (!currentUser || !joinCode.trim()) return;
+
+  try {
+    const res = await fetch(
+      `https://game-on-9bhv.onrender.com/api/leagues/${joinCode}/join`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ userId: currentUser.id }),
+      }
+    );
+
+    if (!res.ok) throw new Error("Failed to join league");
+    const data = await res.json();
+    console.log("Joined league:", data);
+  } catch (err) {
+    console.error("Error:", err);
+  }
+};
+
+const leaveLeague = async (leagueId) => {
+  if (!currentUser) return;
+
+  const res = await fetch(
+    `https://game-on-9bhv.onrender.com/api/leagues/${leagueId}/leave`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ userId: currentUser.id }), // <-- use currentUser.id
+    }
+  );
+};
 
   const openLeagueDetails = (league) => {
     setSelectedLeague(league);
     setShowLeagueDetails(true);
-  };
-
-  const leaveLeague = (leagueId) => {
-    console.log('Leaving league:', leagueId);
-    setShowLeagueDetails(false);
-    // TODO: Add logic to leave league in DB
   };
 
   const copyToClipboard = (text, type) => {
@@ -66,6 +120,36 @@ const Dashboard = () => {
       setTimeout(() => setCopiedLink(false), 2000);
     }
   };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token'); // clear token
+    navigate('/'); // or '/auth' depending on your route
+  };
+
+const createLeagueInDB = async () => {
+  const leagueData = {
+    name: leagueName,
+    creatorId: currentUser.id,
+  };
+
+  try {
+    const token = localStorage.getItem('token');
+    const res = await fetch('https://game-on-9bhv.onrender.com/api/leagues', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(leagueData)
+    });
+
+    if (!res.ok) throw new Error('Failed to create league');
+    const data = await res.json();
+    console.log('League created:', data);
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   const mockLeagues = [
     { id: 1, name: "Ice Queens League", members: 8, maxMembers: 12, code: "ICE2024", isOwner: true },
@@ -110,15 +194,18 @@ const Dashboard = () => {
               </div>
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">PUCK<span className="text-purple-300">YEAH</span></h1>
-              <p className="text-purple-200 text-sm">Welcome back, User!</p>
+              <h1 className="text-2xl font-bold text-white">PUCK<span className="text-purple-300"> YEAH!</span></h1>
+              <p className="text-purple-200 text-sm">Welcome back, {currentUser ? currentUser.username : "User"}!</p>
             </div>
           </div>
           <div className="flex items-center space-x-4">
             <button className="p-2 text-purple-200 hover:text-white transition-colors">
               <Settings className="w-5 h-5" />
             </button>
-            <button className="p-2 text-purple-200 hover:text-white transition-colors">
+            <button
+              onClick={handleLogout}
+              className="p-2 text-purple-200 hover:text-white transition-colors"
+            >
               <LogOut className="w-5 h-5" />
             </button>
           </div>
@@ -152,186 +239,186 @@ const Dashboard = () => {
           </div>
         </div>
 
-              {/* Top Row: Create & Join League */}
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-    {/* Create League */}
-    <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 animate-slide-up">
-      <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
-        <Plus className="w-6 h-6 mr-3 text-purple-300" />
-        Create Your League
-      </h2>
-      <p className="text-purple-200 mb-6">Start your own fantasy hockey league and invite friends to compete!</p>
-      <button
-        onClick={() => setShowCreateLeague(true)}
-        className="w-full py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold rounded-2xl shadow-lg transform transition-all duration-300 hover:from-purple-500 hover:to-purple-600 hover:shadow-xl hover:-translate-y-1 relative overflow-hidden group"
-      >
-        <span className="relative z-10">CREATE LEAGUE</span>
-        <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-      </button>
-    </div>
-
-    {/* Join League */}
-    <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 animate-slide-up">
-      <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
-        <Users className="w-6 h-6 mr-3 text-purple-300" />
-        Join a League
-      </h2>
-      <p className="text-purple-200 mb-6">Enter a code to join your friends’ fantasy hockey league!</p>
-      <button
-        onClick={() => setShowJoinLeague(true)}
-        className="w-full py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold rounded-2xl shadow-lg transform transition-all duration-300 hover:from-purple-500 hover:to-purple-600 hover:shadow-xl hover:-translate-y-1 relative overflow-hidden group"
-      >
-        <span className="relative z-10">JOIN LEAGUE</span>
-        <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-      </button>
-    </div>
-  </div>
-
-  {/* My Leagues (full width) */}
-  <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 mb-8 animate-slide-up">
-    <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
-      <Trophy className="w-6 h-6 mr-3 text-purple-300" />
-      My Leagues
-    </h2>
-    <div className="space-y-4">
-      {mockLeagues.map((league) => (
-        <div
-          key={league.id}
-          onClick={() => openLeagueDetails(league)}
-          className="cursor-pointer bg-white/10 rounded-2xl p-4 border border-white/10 hover:bg-white/20 transition-all duration-300 transform hover:scale-105"
-        >
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="font-semibold text-white flex items-center">
-              {league.name}
-              {league.isOwner && <Crown className="w-4 h-4 ml-2 text-yellow-400" />}
-            </h3>
-            <span className="text-xs text-purple-300 font-mono">{league.code}</span>
+        {/* Top Row: Create & Join League */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          {/* Create League */}
+          <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 animate-slide-up">
+            <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
+              <Plus className="w-6 h-6 mr-3 text-purple-300" />
+              Create Your League
+            </h2>
+            <p className="text-purple-200 mb-6">Start your own fantasy hockey league and invite friends to compete!</p>
+            <button
+              onClick={() => setShowCreateLeague(true)}
+              className="w-full py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold rounded-2xl shadow-lg transform transition-all duration-300 hover:from-purple-500 hover:to-purple-600 hover:shadow-xl hover:-translate-y-1 relative overflow-hidden group"
+            >
+              <span className="relative z-10">CREATE LEAGUE</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+            </button>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-purple-200 text-sm">
-              {league.members}/{league.maxMembers} members
-            </span>
-            <span className="text-purple-300 text-xs">{league.draftStatus}</span>
+
+          {/* Join League */}
+          <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 animate-slide-up">
+            <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
+              <Users className="w-6 h-6 mr-3 text-purple-300" />
+              Join a League
+            </h2>
+            <p className="text-purple-200 mb-6">Enter a code to join your friends’ fantasy hockey league!</p>
+            <button
+              onClick={() => setShowJoinLeague(true)}
+              className="w-full py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold rounded-2xl shadow-lg transform transition-all duration-300 hover:from-purple-500 hover:to-purple-600 hover:shadow-xl hover:-translate-y-1 relative overflow-hidden group"
+            >
+              <span className="relative z-10">JOIN LEAGUE</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+            </button>
           </div>
         </div>
-      ))}
-    </div>
-  </div>
+
+        {/* My Leagues (full width) */}
+        <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 mb-8 animate-slide-up">
+          <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
+            <Trophy className="w-6 h-6 mr-3 text-purple-300" />
+            My Leagues
+          </h2>
+          <div className="space-y-4">
+            {mockLeagues.map((league) => (
+              <div
+                key={league.id}
+                onClick={() => openLeagueDetails(league)}
+                className="cursor-pointer bg-white/10 rounded-2xl p-4 border border-white/10 hover:bg-white/20 transition-all duration-300 transform hover:scale-105"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-semibold text-white flex items-center">
+                    {league.name}
+                    {league.isOwner && <Crown className="w-4 h-4 ml-2 text-yellow-400" />}
+                  </h3>
+                  <span className="text-xs text-purple-300 font-mono">{league.code}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-purple-200 text-sm">
+                    {league.members}/{league.maxMembers} members
+                  </span>
+                  <span className="text-purple-300 text-xs">{league.draftStatus}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
 
 
 
-            {/* League Details Modal */}
-            {showLeagueDetails && selectedLeague && (
-              <div className="fixed inset-0 z-50 h-screen flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 w-full max-w-4xl max-h-[calc(100vh-2rem)] overflow-y-auto animate-fade-in">
-                  <div className="p-8 border-b border-white/10">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-3xl font-bold text-white flex items-center">
-                        {selectedLeague.name}
-                        {selectedLeague.isOwner && <Crown className="w-6 h-6 ml-3 text-yellow-400" />}
-                      </h2>
-                      <button
-                        onClick={() => setShowLeagueDetails(false)}
-                        className="text-purple-200 hover:text-white transition-colors p-2"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                      <div className="bg-white/10 rounded-xl p-4 text-center">
-                        <div className="text-white font-bold text-lg">{selectedLeague.members}/{selectedLeague.maxMembers}</div>
-                        <div className="text-purple-200 text-sm">Members</div>
-                      </div>
-                      <div className="bg-white/10 rounded-xl p-4 text-center">
-                        <div className="text-white font-bold text-lg">{selectedLeague.draftStatus}</div>
-                        <div className="text-purple-200 text-sm">Draft Status</div>
-                      </div>
-                    </div>
-                    <div className="bg-white/5 rounded-xl p-4 mb-6">
-                      <div className="flex items-center justify-between">
-                        <span className="text-purple-200">League Code:</span>
-                        <div className="flex items-center space-x-2">
-                          <span className="font-mono text-white bg-white/10 px-3 py-1 rounded">{selectedLeague.code}</span>
-                          <button
-                            onClick={() => copyToClipboard(selectedLeague.code, 'code')}
-                            className="p-1 text-purple-300 hover:text-white transition-colors"
-                          >
-                            <Copy className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => leaveLeague(selectedLeague.id)}
-                      className="w-full py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-bold rounded-2xl hover:from-red-500 hover:to-red-600 transition-all"
-                    >
-                      Leave League
-                    </button>
+        {/* League Details Modal */}
+        {showLeagueDetails && selectedLeague && (
+          <div className="fixed inset-0 z-50 h-screen flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 w-full max-w-4xl max-h-[calc(100vh-2rem)] overflow-y-auto animate-fade-in">
+              <div className="p-8 border-b border-white/10">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-3xl font-bold text-white flex items-center">
+                    {selectedLeague.name}
+                    {selectedLeague.isOwner && <Crown className="w-6 h-6 ml-3 text-yellow-400" />}
+                  </h2>
+                  <button
+                    onClick={() => setShowLeagueDetails(false)}
+                    className="text-purple-200 hover:text-white transition-colors p-2"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  <div className="bg-white/10 rounded-xl p-4 text-center">
+                    <div className="text-white font-bold text-lg">{selectedLeague.members}/{selectedLeague.maxMembers}</div>
+                    <div className="text-purple-200 text-sm">Members</div>
                   </div>
-                  <div className="p-8">
-                    <h3 className="text-xl font-bold text-white mb-6 flex items-center">
-                      <Users className="w-5 h-5 mr-2 text-purple-300" />
-                      League Standings
-                    </h3>
-                    <div className="space-y-3">
-                      {selectedLeague.memberList?.map((member) => (
-                        <div key={member.name} className="flex items-center justify-between p-3 bg-white/5 rounded-xl hover:bg-white/10 transition-all duration-300">
-                          <span className="text-white">{member.name}</span>
-                          <span className="text-purple-300 text-sm">#{member.rank}</span>
-                        </div>
-                      ))}
+                  <div className="bg-white/10 rounded-xl p-4 text-center">
+                    <div className="text-white font-bold text-lg">{selectedLeague.draftStatus}</div>
+                    <div className="text-purple-200 text-sm">Draft Status</div>
+                  </div>
+                </div>
+                <div className="bg-white/5 rounded-xl p-4 mb-6">
+                  <div className="flex items-center justify-between">
+                    <span className="text-purple-200">League Code:</span>
+                    <div className="flex items-center space-x-2">
+                      <span className="font-mono text-white bg-white/10 px-3 py-1 rounded">{selectedLeague.code}</span>
+                      <button
+                        onClick={() => copyToClipboard(selectedLeague.code, 'code')}
+                        className="p-1 text-purple-300 hover:text-white transition-colors"
+                      >
+                        <Copy className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
                 </div>
+                <button
+                  onClick={() => leaveLeague(selectedLeague.id)}
+                  className="w-full py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-bold rounded-2xl hover:from-red-500 hover:to-red-600 transition-all"
+                >
+                  Leave League
+                </button>
               </div>
-            )}
+              <div className="p-8">
+                <h3 className="text-xl font-bold text-white mb-6 flex items-center">
+                  <Users className="w-5 h-5 mr-2 text-purple-300" />
+                  League Standings
+                </h3>
+                <div className="space-y-3">
+                  {selectedLeague.memberList?.map((member) => (
+                    <div key={member.name} className="flex items-center justify-between p-3 bg-white/5 rounded-xl hover:bg-white/10 transition-all duration-300">
+                      <span className="text-white">{member.name}</span>
+                      <span className="text-purple-300 text-sm">#{member.rank}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
+        )}
+      </div>
 
-            
-  {/* Recent Matchups (full width, same style as My Leagues) */}
-<div className="max-w-[77rem] mx-auto">
-  <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 mb-8 animate-slide-up">
-    <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
-      <Calendar className="w-6 h-6 mr-3 text-purple-300" />
-    Recent Matchups
-  </h2>
-  <div className="space-y-4">
-    {mockMatchups.map((match) => (
-      <div
-        key={match.id}
-        className="cursor-pointer bg-white/10 rounded-2xl p-4 border border-white/10 hover:bg-white/20 transition-all duration-300 transform hover:scale-105"
-      >
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-bold">VS</span>
-            </div>
-            <div>
-              <h3 className="font-semibold text-white">{match.opponent}</h3>
-              <p className="text-purple-200 text-sm">{match.date}</p>
-            </div>
-          </div>
-          <div className="text-right">
-            {match.status === 'upcoming' ? (
-              <span className="text-yellow-400 text-sm font-semibold">UPCOMING</span>
-            ) : (
-              <div className="flex items-center space-x-2">
-                <span className="text-white font-bold">{match.myScore}</span>
-                <span className="text-purple-300">-</span>
-                <span className="text-white font-bold">{match.opponentScore}</span>
-                <span className={`text-sm font-semibold ml-2 ${match.status === 'won' ? 'text-green-400' : 'text-red-400'}`}>
-                  {match.status.toUpperCase()}
-                </span>
+
+      {/* Recent Matchups (full width, same style as My Leagues) */}
+      <div className="max-w-[77rem] mx-auto -mt-8">
+        <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 mb-8 animate-slide-up">
+          <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
+            <Calendar className="w-6 h-6 mr-3 text-purple-300" />
+            Recent Matchups
+          </h2>
+          <div className="space-y-4">
+            {mockMatchups.map((match) => (
+              <div
+                key={match.id}
+                className="cursor-pointer bg-white/10 rounded-2xl p-4 border border-white/10 hover:bg-white/20 transition-all duration-300 transform hover:scale-105"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-sm font-bold">VS</span>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-white">{match.opponent}</h3>
+                      <p className="text-purple-200 text-sm">{match.date}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    {match.status === 'upcoming' ? (
+                      <span className="text-yellow-400 text-sm font-semibold">UPCOMING</span>
+                    ) : (
+                      <div className="flex items-center space-x-2">
+                        <span className="text-white font-bold">{match.myScore}</span>
+                        <span className="text-purple-300">-</span>
+                        <span className="text-white font-bold">{match.opponentScore}</span>
+                        <span className={`text-sm font-semibold ml-2 ${match.status === 'won' ? 'text-green-400' : 'text-red-400'}`}>
+                          {match.status.toUpperCase()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
-            )}
+            ))}
           </div>
         </div>
       </div>
-    ))}
-    </div>
-  </div>
-          </div>
 
       {/* Create League Modal */}
       {showCreateLeague && (
@@ -342,6 +429,8 @@ const Dashboard = () => {
               <input
                 type="text"
                 placeholder="League Name"
+                value={leagueName}
+                onChange={(e) => setLeagueName(e.target.value)}
                 className="w-full p-4 bg-white/10 border border-white/20 rounded-2xl text-white placeholder-purple-300 focus:outline-none focus:border-white transition-all"
               />
               <select className="w-full p-4 bg-white/10 border border-white/20 rounded-2xl text-white focus:outline-none focus:border-white transition-all">
@@ -444,30 +533,30 @@ const Dashboard = () => {
         </div>
       )}
 
-      <style jsx>{`
-        @keyframes fade-in {
-          from { opacity: 0; transform: translateY(-20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes slide-up {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .animate-fade-in {
-          animation: fade-in 0.8s ease-out;
-        }
-        
-        .animate-slide-up {
-          animation: slide-up 0.6s ease-out;
-          animation-fill-mode: both;
-        }
-        
-        .animate-slide-up:nth-child(1) { animation-delay: 0.1s; }
-        .animate-slide-up:nth-child(2) { animation-delay: 0.2s; }
-        .animate-slide-up:nth-child(3) { animation-delay: 0.3s; }
-      `}</style>
+      <style>{`
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.8s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.6s ease-out;
+    animation-fill-mode: both;
+  }
+
+  .animate-slide-up:nth-child(1) { animation-delay: 0.1s; }
+  .animate-slide-up:nth-child(2) { animation-delay: 0.2s; }
+  .animate-slide-up:nth-child(3) { animation-delay: 0.3s; }
+`}</style>
     </div>
 
   );

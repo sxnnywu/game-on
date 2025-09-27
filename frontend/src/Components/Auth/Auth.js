@@ -109,7 +109,7 @@ const Auth = () => {
             </div>
           </div>
           <h1 className="text-6xl lg:text-7xl font-bold text-white mb-6 tracking-wide leading-tight">
-            GAME<span className="text-purple-300">ON</span>
+            Puck<span className="text-purple-300"> Yeah!</span>
           </h1>
           <p className="text-purple-200 text-xl lg:text-2xl mb-6 leading-relaxed">
             Women's Hockey. Reimagined.
@@ -241,7 +241,7 @@ const Auth = () => {
             {/* Footer */}
             <div className="mt-8 text-center">
               <p className="text-purple-200 text-sm">
-                {isLogin ? "New to GameOn?" : "Already have an account?"}
+                {isLogin ? "New to Puck Yeah?" : "Already have an account?"}
                 <button
                   onClick={switchMode}
                   className="ml-2 text-white font-semibold hover:text-purple-300 transition-colors underline decoration-2 underline-offset-4"
