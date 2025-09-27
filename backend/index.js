@@ -1,6 +1,9 @@
 // import express
 const express = require('express');
 
+// import dotenv
+require('dotenv').config();
+
 // connect to mongoDB
 const connectDB = require('./config/db');
 connectDB();
