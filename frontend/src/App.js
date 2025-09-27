@@ -17,12 +17,9 @@ function App() {
         <Route path="/" element={<Auth/>} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/draft" element={<PlayerDraft/>}/>
-<<<<<<< HEAD
         <Route path="/gemini" element={<GeminiWidget/>} />
-=======
         <Route path="/*" element={<GeminiWidget/>} />
         <Route path="/myteam" element={<MyTeam/>} />
->>>>>>> anahat-branch
       </Routes>
     </Router>
     </>
