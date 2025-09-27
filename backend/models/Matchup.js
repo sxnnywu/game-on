@@ -2,10 +2,6 @@ const mongoose = require('mongoose');
 
 // define schema
 const matchupSchema = new mongoose.Schema({
-    _id: {
-        type: Integer,
-        required: true
-    },
     leagueId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'League',
