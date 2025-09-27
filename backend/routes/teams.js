@@ -37,12 +37,13 @@ router.post('/:id/lineup', async (req, res) => {
     }
 
     try {
+        console.log("Updating lineup for user:", userId, "in league:", leagueId, "with players:", players);
         const team = await Team.findOneAndUpdate(
             { _id: req.params.id, ownerId: userId, leagueId: leagueId },
             { lineup: players },
             { new: true }
         );
-
+        console.log("Updated team:", team);
         if (!team) {
             return res.status(404).json({ error: 'Team not found' });
         }
