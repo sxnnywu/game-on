@@ -9,7 +9,7 @@ const GeminiWidget = () => {
   const fetchCommentary = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5001/api/gemini');
+      const response = await fetch('https://game-on-9bhv.onrender.com/api/gemini');
       const data = await response.json();
       setCommentary(data.commentary);
     } catch (error) {

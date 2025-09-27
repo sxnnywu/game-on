@@ -2,11 +2,16 @@ const express = require('express');
 const fetch = require('node-fetch'); // or native fetch if Node 18+
 require('dotenv').config();
 
+console.log('Gemini route file loaded, environment variables:', {
+  GOOGLE_GEMINI_API_KEY: process.env.GOOGLE_GEMINI_API_KEY ? 'Present' : 'Missing'
+});
+
 const router = express.Router();
 const API_KEY = process.env.GOOGLE_GEMINI_API_KEY;
 
 console.log('Gemini route file loaded, API_KEY:', API_KEY ? 'Present' : 'Missing');
 
+// root
 router.get('/', async (req, res) => {
   console.log('Received request to /api/gemini');
 
@@ -18,6 +23,8 @@ router.get('/', async (req, res) => {
 
   try {
     console.log('Sending request to Gemini API...');
+
+    // Call Gemini API
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`,
       {
@@ -31,23 +38,27 @@ router.get('/', async (req, res) => {
         }),
       }
     );
-
     console.log('Gemini API responded with status:', response.status);
 
+    // if response is not ok, log the error
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Gemini API error response:', errorText);
       return res.status(500).json({ commentary: "Error from Gemini API." });
     }
 
+    // Parse JSON response
     const data = await response.json();
     console.log('Gemini API JSON parsed:', JSON.stringify(data).slice(0, 200) + '...'); // print first 200 chars
 
+    // Extract commentary from response
     const commentary = data.candidates?.[0]?.output || "No commentary available.";
     console.log('Extracted commentary:', commentary);
 
+    // Send commentary back to client
     res.json({ commentary });
-  } catch (error) {
+  } 
+  catch (error) {
     console.error('Fetch error caught:', error);
     res.status(500).json({ commentary: "Error fetching commentary." });
   }
