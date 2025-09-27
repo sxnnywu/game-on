@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Trophy, Plus, Copy, Share2, Crown, Calendar, Target, Zap, Settings, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const [puckPosition, setPuckPosition] = useState(0);
@@ -13,6 +14,8 @@ const Dashboard = () => {
   const [showLeagueDetails, setShowLeagueDetails] = useState(false);
   const [selectedLeague, setSelectedLeague] = useState(null);
   const [joinCode, setJoinCode] = useState('');
+  const navigate = useNavigate();
+
 
   // Animated puck movement
   useEffect(() => {
@@ -184,6 +187,33 @@ const Dashboard = () => {
         <span className="relative z-10">JOIN LEAGUE</span>
         <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
       </button>
+    </div>
+  </div>
+
+   {/* Upcoming Drafts (full width) */}
+  <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 mb-8 animate-slide-up">
+    <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
+      <Calendar className="w-6 h-6 mr-3 text-purple-300" />
+      Upcoming Drafts
+    </h2>
+    <div className="space-y-4">
+      <div className="cursor-pointer bg-white/10 rounded-2xl p-4 border border-white/10 hover:bg-white/20 transition-all duration-300 transform hover:scale-105">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="font-semibold text-white flex items-center">
+            Women’s Fantasy Hockey Draft
+          </h3>
+          <span className="text-xs text-purple-300 font-mono">NOW</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-purple-200 text-sm">Drafting in progress ⏱️</span>
+          <button
+          onClick={() => navigate('/draft')}
+          className="px-4 py-2 text-sm font-semibold bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-500 hover:to-purple-600 transition-all"
+        >
+          Join
+        </button>
+        </div>
+      </div>
     </div>
   </div>
 

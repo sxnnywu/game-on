@@ -38,6 +38,9 @@ router.post('/', async (req, res) => {
   }
 });
 
+// Get all leagues a user is in
+
+
 // Get league details
 router.get('/:id', async (req, res) => {
   try {

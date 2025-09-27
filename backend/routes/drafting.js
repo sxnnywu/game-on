@@ -112,6 +112,50 @@ router.post('/:id/draft/pick', async (req, res) => {
     }
 });
 
+const generateSchedule = (league, seasonWeeks) => {
+    const teams = league.teamIds;
+    const allMatchups = [];
+
+    //Generate all possible unique matchups (A vs B)
+    for (let i = 0; i < teams.length; i++) {
+        for (let j = i + 1; j < teams.length; j++) {
+            allMatchups.push({ teamAId: teams[i]._id, teamBId: teams[j]._id });
+        }
+    }
+
+    //Fill enough games to cover all weeks
+    const gamesNeeded = Math.ceil((seasonWeeks * teams.length) / 2); // games per week = teams/2
+    const matchupPool = [];
+    while (matchupPool.length < gamesNeeded) {
+        matchupPool.push(...allMatchups.sort(() => Math.random() - 0.5));
+    }
+
+    //Assign matchups to weeks
+    const schedule = Array.from({ length: seasonWeeks }, () => []);
+    const teamUsedThisWeek = new Set();
+
+    let weekIndex = 0;
+    for (const matchup of matchupPool) {
+        const {teamAId, teamBId} = matchup;
+
+        //If either team already scheduled this week, skip to next week
+        if (teamUsedThisWeek.has(teamAId) || teamUsedThisWeek.has(teamBId)) {
+            weekIndex++;
+            if (weekIndex >= numWeeks) {
+                weekIndex = 0;
+            }
+            teamUsedThisWeek.clear();
+        }
+
+        schedule[weekIndex].push({week: weekIndex + 1, teamAId, teamBId});
+        teamUsedThisWeek.add(teamAId);
+        teamUsedThisWeek.add(teamBId);
+    }
+
+    return schedule;
+
+}
+
 // finalize draft and generate rosters
 router.post('/:id/draft/finish', async (req, res) => {
     const leagueId = req.params.id;
@@ -147,6 +191,23 @@ router.post('/:id/draft/finish', async (req, res) => {
 
         // Mark draft as finished
         league.draftStatus = 'finished';
+
+        const schedule = generateSchedule(league, 18);
+
+        schedule.forEach(match => {
+            const inserted = Matchup.insertOne({
+                leagueId: league._id,
+                week: match.weekIndex,
+                teamAId: match.team,
+                teamBId: match.teamBId,
+                scoreA: 0,
+                scoreB: 0,
+                status: 'upcoming'
+            });
+
+            league.schedule.push(inserted);
+        });
+
         await league.save();
 
         // Respond with success
