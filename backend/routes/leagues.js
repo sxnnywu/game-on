@@ -23,7 +23,7 @@ router.post('/', async (req, res) => {
       teamIds: [],
       draftStatus: 'not_started',
       currentTurn: null,
-      round: 0,
+      week: 0,
       playerPool: [],
       draftedPlayers: [],
       schedule: [],

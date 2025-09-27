@@ -7,6 +7,11 @@ const playerSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
+    pwhlSystemID: {
+        type: Number,
+        required: true,
+        default: 0
+    },
     team: {
         type: String,
         required: true,
@@ -26,12 +31,14 @@ const playerSchema = new mongoose.Schema({
         goals: { type: Number, default: 0 },
         assists: { type: Number, default: 0 },
         saves: { type: Number, default: 0 },
+        shots: {type: Number, default: 0}
         // we can add more stats as needed
     },
     stats: {
         goals: { type: Number, default: 0 },
         assists: { type: Number, default: 0 },
         saves: { type: Number, default: 0 },
+        shots: {type: Number, default: 0}
         // we can add more stats as needed
     },
     draftStatus: {
