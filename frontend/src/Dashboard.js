@@ -276,6 +276,12 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
     fetchMatchups();
   }, [currentUser, token]);
 
+  {/* My Team Storage */}
+  const goToMyTeam = (league) => {
+  setLeagueId(league.id);
+  navigate('/myteam'); 
+  };
+
   return (
     <>
       {/* Main dashboard container */}
@@ -603,10 +609,10 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
                 </button>
               )}
               <button
-                onClick={() => leaveLeague(selectedLeague.id)}
+                onClick={() => goToMyTeam(selectedLeague)}
                 className="px-4 py-2 rounded-lg bg-purple-600 text-white"
               >
-              My Team
+                My Team
               </button>
               <button
                 onClick={() => navigate('/myteam')}
