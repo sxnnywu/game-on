@@ -85,7 +85,8 @@ router.get('/user/:userId', async (req, res) => {
 
     // find all matchups in those leagues
     const matchups = await Matchup.find({ leagueId: { $in: leagueIds } })
-    .populate('teams')
+    .populate('teamAId')
+    .populate('teamBId')
     .populate('leagueId');
 
     res.status(200).json({ matchups });
