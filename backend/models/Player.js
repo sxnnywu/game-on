@@ -39,11 +39,19 @@ const playerSchema = new mongoose.Schema({
         saves: { type: Number, default: 0 },
         shots: {type: Number, default: 0}
     },
-    draftStatus: {
-        type: String,
-        enum: ['available', 'drafted'],
-        default: 'available'
+    lastSeasonStats: {
+        rookie: {type: Boolean, default: true},
+        goals: { type: Number, default: 0 },
+        assists: { type: Number, default: 0 },
+        saves: { type: Number, default: 0 },
+        shots: {type: Number, default: 0}
     },
+    draftStatus: [
+        {
+            leagueId: {type: mongoose.Schema.Types.ObjectId, ref: 'League'},
+            status: {type: String, enum: ['available', 'drafted'], default: 'available'}
+        }
+    ],
     createdAt: {
         type: Date,
         default: Date.now

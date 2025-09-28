@@ -30,6 +30,13 @@ router.post('/', async (req, res) => {
       standings: [],
       createdAt: new Date()
     });
+
+    draftablePlayers = Player.find({status: true});
+    draftablePlayers.forEach(async player => {
+      newLeague.playerPool.push(player._id);
+      player.draftStatus.push([newLeague._id, "available"]);
+    })
+    
     res.status(201).json(newLeague);
   } 
   catch (err) {
