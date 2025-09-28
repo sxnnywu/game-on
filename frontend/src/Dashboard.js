@@ -276,10 +276,10 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
     fetchMatchups();
   }, [currentUser, token]);
 
-  {/* My Team Storage */}
+  {/* My Team Storage */ }
   const goToMyTeam = (league) => {
-  setLeagueId(league.id);
-  navigate('/myteam'); 
+    setLeagueId(league.id);
+    navigate('/myteam');
   };
 
   return (
@@ -302,19 +302,29 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
         {/* Header */}
         <div className="relative z-10 bg-white/5 backdrop-blur-sm border-b border-white/10">
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <Zap className="w-10 h-10 text-white animate-pulse" />
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-purple-500 rounded-full flex items-center justify-center">
-                  <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+
+            {/* Left side: Logo + Dashboard */}
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <Zap className="w-10 h-10 text-white animate-pulse" />
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-purple-500 rounded-full flex items-center justify-center">
+                    <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                  </div>
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-white">PUCK<span className="text-purple-300"> YEAH!</span></h1>
+                  <p className="text-purple-200 text-sm">Welcome back, {currentUser ? currentUser.username : "User"}!</p>
                 </div>
               </div>
-              <div>
-                <h1 className="text-2xl font-bold text-white">PUCK<span className="text-purple-300"> YEAH!</span></h1>
-                <p className="text-purple-200 text-sm">Welcome back, {currentUser ? currentUser.username : "User"}!</p>
+
+              {/* Dashboard link next to title */}
+              <div className="text-white text-bold text-xl">
+                <a href="/dashboard" className="hover:text-purple-300 transition-colors">DASHBOARD</a>
               </div>
             </div>
-            <div className="text-white text-bold text-xl"><a href="/dashboard">DASHBOARD</a></div>
+
+            {/* Right side: Settings + Logout */}
             <div className="flex items-center space-x-4">
               <button className="p-2 text-purple-200 hover:text-white transition-colors">
                 <Settings className="w-5 h-5" />
