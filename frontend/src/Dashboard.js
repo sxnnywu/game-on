@@ -117,47 +117,47 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
   };
 
   const leaveLeague = async (leagueId) => {
-  console.log("Attempting to leave league with ID:", leagueId);
-  if (!currentUser) return;
+    console.log("Attempting to leave league with ID:", leagueId);
+    if (!currentUser) return;
 
-  try {
-    const res = await fetch(
-      `https://game-on-9bhv.onrender.com/api/leagues/${leagueId}/leave`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ userId: currentUser.id }),
-      }
-    );
+    try {
+      const res = await fetch(
+        `https://game-on-9bhv.onrender.com/api/leagues/${leagueId}/leave`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ userId: currentUser.id }),
+        }
+      );
 
-    if (!res.ok) throw new Error("Failed to leave league");
+      if (!res.ok) throw new Error("Failed to leave league");
 
-    // ✅ Update state locally instead of full page reload
-    setLeagues(prevLeagues => prevLeagues.filter(l => l.id !== leagueId));
+      // ✅ Update state locally instead of full page reload
+      setLeagues(prevLeagues => prevLeagues.filter(l => l.id !== leagueId));
 
-    // ✅ Close modal
-    setShowLeagueDetails(false);
-    setSelectedLeague(null);
+      // ✅ Close modal
+      setShowLeagueDetails(false);
+      setSelectedLeague(null);
 
-    console.log("Successfully left league:", leagueId);
-  } 
-  catch (err) {
-    console.error(err);
-  }
-};
+      console.log("Successfully left league:", leagueId);
+    }
+    catch (err) {
+      console.error(err);
+    }
+  };
 
 
   const openLeagueDetails = (league) => {
-  setSelectedLeague(league);
+    setSelectedLeague(league);
 
-  // tell App.js which league/team are selected
-  setLeagueId(league.id); 
-  setTeamId("TEMP_TEAM_ID"); // replace with real team id once available
+    // tell App.js which league/team are selected
+    setLeagueId(league.id);
+    setTeamId("TEMP_TEAM_ID"); // replace with real team id once available
 
-  setShowLeagueDetails(true);
+    setShowLeagueDetails(true);
   };
 
   const copyToClipboard = (text, type) => {
@@ -238,14 +238,41 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
         console.log("Matchups response JSON", data);
 
         // Map backend → frontend shape
-        const mappedMatchups = data.matchups.map(match => ({
-          teamA: match.teamAId,
-          teamB: match.teamBId,
-          scoreA: match.scoreA,
-          scoreB: match.scoreB,
-          status: match.status,
-          week: match.week
-        }));
+        // const mappedMatchups = data.matchups.map(match => ({
+        //   id: match._id,
+        //   opponent: match.teamAId._id === currentUser.teamId ? match.teamBId.name : match.teamAId.name,
+        //   myScore: match.teamAId._id === currentUser.teamId ? match.scoreA : match.scoreB,
+        //   opponentScore: match.teamAId._id === currentUser.teamId ? match.scoreB : match.scoreA,
+        //   status: match.status,
+        //   week: match.week,
+        //   date: match.createdAt
+        // }));
+        const mappedMatchups = data.matchups.map((match) => {
+          const isTeamA = match.teamAId?._id === currentUser.teamId;
+          const myTeam = isTeamA ? match.teamAId : match.teamBId;
+          const opponentTeam = isTeamA ? match.teamBId : match.teamAId;
+
+          console.log("Mapping matchup:", {
+            myTeam: myTeam?.name,
+            opponentTeam: opponentTeam?.name,
+            scoreA: match.scoreA,
+            scoreB: match.scoreB,
+            status: match.status,
+          });
+
+          return {
+            id: match._id,
+            // ✅ Combine both team names for the modal
+            opponent: `${myTeam?.name || "My Team"} VS ${opponentTeam?.name || "Unknown Team"}`,
+            myScore: isTeamA ? match.scoreA : match.scoreB,
+            opponentScore: isTeamA ? match.scoreB : match.scoreA,
+            status: match.status,
+            week: match.week,
+            date: match.createdAt ? new Date(match.createdAt).toISOString().split('T')[0] : "Unknown Date"
+          };
+        });
+
+
         setMatchups(mappedMatchups);
       } catch (err) {
         console.error(err);
@@ -445,7 +472,7 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
                         </div>
                       </div>
                       <div className="text-right">
-                        {match.status === 'upcoming' ? (
+                        {match.status?.toLowerCase() === 'upcoming' ? (
                           <span className="text-yellow-400 text-sm font-semibold">UPCOMING</span>
                         ) : (
                           <div className="flex items-center space-x-2">
