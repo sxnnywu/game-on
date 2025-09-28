@@ -32,14 +32,15 @@ router.post('/', async (req, res) => {
       createdAt: new Date()
     });
 
-    draftablePlayers = await Player.find({status: true});
-    draftablePlayers.forEach(async player => {
+    draftablePlayers = await Player.find({ status: true });
+    for (const player of draftablePlayers) {
       newLeague.playerPool.push(player._id);
       player.draftStatus.push([newLeague._id, "available"]);
-    })
-    
+      await player.save(); // make sure changes are persisted
+    }
+
     res.status(201).json(newLeague);
-  } 
+  }
   catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
@@ -60,7 +61,7 @@ router.get('/:id/leagues', async (req, res) => {
 
     // Return leagues
     res.status(200).json({ leagues: user.leagues });
-  } 
+  }
   catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
@@ -81,7 +82,7 @@ router.get('/:id', async (req, res) => {
 
     // Return league details
     res.json(league);
-  } 
+  }
   catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
@@ -115,7 +116,7 @@ router.post('/:id/join', async (req, res) => {
     await user.save();
     await league.save();
     res.json({ message: 'Joined league successfully' });
-  } 
+  }
   catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
@@ -147,7 +148,7 @@ router.post('/:id/leave', async (req, res) => {
 
     await user.save();
     res.json({ message: 'Left league successfully' });
-  } 
+  }
   catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });

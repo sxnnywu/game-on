@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Zap, Users, TrendingUp, Star, Filter, Search } from "lucide-react";
+import { jwtDecode } from "jwt-decode";
 
 const PlayerDraft = () => {
   const logos = [
@@ -112,7 +113,7 @@ const PlayerDraft = () => {
   const draftNextStep = async ()  => {
     const leagueID = currentUser.league[0];
     const response = await fetch(`https://game-on-9bhv.onrender.com/api/legaue/${leagueID}/draft`);
-    constDraftInfo = response.json();
+    const DraftInfo = response.json();
 
     
   }

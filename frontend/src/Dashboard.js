@@ -54,6 +54,7 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
     setInviteLink(link);
   };
 
+  // create league
   const createLeagueInDB = async () => {
     if (!leagueName.trim() || !currentUser) return;
 
@@ -69,6 +70,7 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
     };
 
     try {
+      console.log("Creating league with data:", leagueData);
       const res = await fetch('https://game-on-9bhv.onrender.com/api/leagues', {
         method: 'POST',
         headers: {
@@ -77,7 +79,7 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
         },
         body: JSON.stringify(leagueData)
       });
-
+      console.log("Create league response:", res);
       if (!res.ok) throw new Error('Failed to create league');
       const data = await res.json();
       console.log('League created:', data);
@@ -86,6 +88,7 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
     }
   };
 
+  // join league
   const joinLeague = async () => {
     if (!currentUser || !joinCode.trim()) return;
 
