@@ -16,7 +16,7 @@ const Auth = () => {
   const [puckPosition, setPuckPosition] = useState(0);
   const [error, setError] = useState('');
 
-  // Animated puck movement
+  {/* Animated puck movement */}
   useEffect(() => {
     const interval = setInterval(() => {
       setPuckPosition(prev => (prev + 1) % 100);
@@ -24,6 +24,7 @@ const Auth = () => {
     return () => clearInterval(interval);
   }, []);
 
+  {/* Handling Input */}
   const handleInputChange = (e) => {
     setFormData({
       ...formData,
@@ -32,25 +33,22 @@ const Auth = () => {
     if (error) setError('');
   };
 
+  {/* Handling Submission */}
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const API_URL = process.env.REACT_APP_API_URL;
-    const endpoint = isLogin 
-      ? `${API_URL}/api/auth/login` 
+    const endpoint = isLogin
+      ? `${API_URL}/api/auth/login`
       : `${API_URL}/api/auth/signup`;
-
     const payload = isLogin
       ? { email: formData.email, password: formData.password }
       : { email: formData.email, password: formData.password, username: formData.username };
-
     try {
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-
       const text = await response.text();
       let data;
       try {
@@ -59,21 +57,19 @@ const Auth = () => {
         console.error("Failed to parse JSON:", jsonErr);
         return;
       }
-
       if (!response.ok) {
         setError(data.message || "Something went wrong");
         return;
       }
-
       setError('');
       localStorage.setItem('token', data.token);
       navigate('/dashboard');
-
     } catch (error) {
       console.error("Network error:", error);
     }
   };
 
+  {/* Inputs */}
   const switchMode = () => {
     setIsLogin(!isLogin);
     setFormData({ email: '', password: '', confirmPassword: '', username: '' });
@@ -121,16 +117,14 @@ const Auth = () => {
 
         {/* Right Side - Auth Form */}
         <div className="w-full max-w-md mx-auto lg:mx-0 lg:ml-auto">
-
           <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20 transform transition-all duration-500 hover:scale-105">
-
             {/* Toggle Buttons */}
             <div className="flex bg-white/10 rounded-2xl p-1 mb-8">
               <button
                 onClick={() => setIsLogin(true)}
                 className={`flex-1 py-3 px-6 rounded-xl text-sm font-semibold transition-all duration-300 ${isLogin
-                    ? 'bg-white text-purple-900 shadow-lg transform scale-105'
-                    : 'text-white hover:bg-white/10'
+                  ? 'bg-white text-purple-900 shadow-lg transform scale-105'
+                  : 'text-white hover:bg-white/10'
                   }`}
               >
                 LOGIN
@@ -138,17 +132,15 @@ const Auth = () => {
               <button
                 onClick={() => setIsLogin(false)}
                 className={`flex-1 py-3 px-6 rounded-xl text-sm font-semibold transition-all duration-300 ${!isLogin
-                    ? 'bg-white text-purple-900 shadow-lg transform scale-105'
-                    : 'text-white hover:bg-white/10'
+                  ? 'bg-white text-purple-900 shadow-lg transform scale-105'
+                  : 'text-white hover:bg-white/10'
                   }`}
               >
                 SIGN UP
               </button>
             </div>
-
             {/* Form */}
             <div className="space-y-6">
-
               {/* Username (Sign Up only) */}
               {!isLogin && (
                 <div className="relative group animate-slide-up">
@@ -165,12 +157,10 @@ const Auth = () => {
                     required
                   />
                   <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-purple-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-
                   {/* Error message placeholder */}
                   <p className="text-white text-sm mt-1 min-h-[1rem]">{error}</p>
                 </div>
               )}
-
               {/* Email */}
               <div className="relative group animate-slide-up">
                 <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-purple-300 group-hover:text-white transition-colors" />
@@ -185,7 +175,6 @@ const Auth = () => {
                 />
                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-purple-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               </div>
-
               {/* Password */}
               <div className="relative group animate-slide-up">
                 <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-purple-300 group-hover:text-white transition-colors" />
@@ -207,7 +196,6 @@ const Auth = () => {
                 </button>
                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-purple-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               </div>
-
               {/* Confirm Password (Sign Up only) */}
               {!isLogin && (
                 <div className="relative group animate-slide-up">
@@ -224,7 +212,6 @@ const Auth = () => {
                   <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-purple-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                 </div>
               )}
-
               {/* Submit Button */}
               <button
                 type="button"
@@ -237,7 +224,6 @@ const Auth = () => {
                 <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
               </button>
             </div>
-
             {/* Footer */}
             <div className="mt-8 text-center">
               <p className="text-purple-200 text-sm">

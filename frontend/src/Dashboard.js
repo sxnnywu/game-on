@@ -22,7 +22,7 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
   const [matchups, setMatchups] = useState([]);
   const navigate = useNavigate();
 
-  // Animated puck movement
+  {/* Background - Animated Puck Movement */}
   useEffect(() => {
     const interval = setInterval(() => {
       setPuckPosition(prev => (prev + 1) % 100);
@@ -30,6 +30,7 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
     return () => clearInterval(interval);
   }, []);
 
+  {/* UserID MongoDB Token */}
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
@@ -43,172 +44,143 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
     }
   }, []);
 
+  {/* Current User */}
   useEffect(() => {
     console.log("Current user in dashboard:", currentUser);
   }, [currentUser]);
 
-  const generateLeagueCode = () => {
-    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-    const link = `https://puckyeah.com/join/${code}`;
-    setLeagueCode(code);
-    setInviteLink(link);
-  };
-
+  { /* Creating League on MongoDB */}
   const createLeagueInDB = async () => {
-  if (!leagueName.trim() || !currentUser) return;
-
-  const leagueData = {
-    name: leagueName,
-    creatorId: currentUser.id,
-    // Remove code & link here if you want to rely on _id
-  };
-
-  try {
-    const res = await fetch('https://game-on-9bhv.onrender.com/api/leagues', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify(leagueData)
-    });
-
-    if (!res.ok) throw new Error('Failed to create league');
-    const data = await res.json();
-    console.log('League created:', data);
-
-    // Use MongoDB _id as the code
-    const idAsCode = data._id;
-
-    setLeagues(prev => [
-      ...prev,
-      {
-        id: data._id,
-        name: data.name,
-        members: 0,
-        maxMembers: data.maxMembers || 12,
-        code: idAsCode, // Show _id to user
-        isOwner: true
-      }
-    ]);
-
-    // Show invite modal
-    setShowCreateLeague(false);
-    setShowInviteModal(true);
-
-    // Save _id for copying
-    setLeagueCode(idAsCode);
-    setInviteLink(`https://puckyeah.com/join/${idAsCode}`);
-
-    // Reset input
-    setLeagueName('');
-  } catch (err) {
-    console.error(err);
-  }
-};
-
-  const joinLeague = async () => {
-  if (!currentUser || !joinCode.trim()) return;
-
-  // Check if user is already in this league
-  const alreadyJoined = leagues.some(league => league.code === joinCode);
-  if (alreadyJoined) {
-    alert("You are already in this league!"); // You can replace with a nicer toast later
-    return;
-  }
-
-  try {
-    const res = await fetch(
-      `https://game-on-9bhv.onrender.com/api/leagues/${joinCode}/join`,
-      {
-        method: "POST",
+    if (!leagueName.trim() || !currentUser) return;
+    const leagueData = {
+      name: leagueName,
+      creatorId: currentUser.id,
+    };
+    try {
+      const res = await fetch('https://game-on-9bhv.onrender.com/api/leagues', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({ userId: currentUser.id }),
-      }
-    );
-
-    if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(errorData.message || "Failed to join league");
-    }
-
-    const data = await res.json();
-    console.log("Joined league:", data);
-
-    // Add to leagues state only if not already there
-    setLeagues(prev => {
-      const exists = prev.some(l => l.id === data._id);
-      if (exists) return prev;
-      return [
+        body: JSON.stringify(leagueData)
+      });
+      if (!res.ok) throw new Error('Failed to create league');
+      const data = await res.json();
+      console.log('League created:', data);
+      // Use MongoDB _id as the code
+      const idAsCode = data._id;
+      setLeagues(prev => [
         ...prev,
         {
           id: data._id,
           name: data.name,
-          members: data.teamIds?.length || 1,
+          members: 0,
           maxMembers: data.maxMembers || 12,
-          code: data.code || joinCode,
-          isOwner: data.creatorId === currentUser.id
+          code: idAsCode, 
+          isOwner: true
         }
-      ];
-    });
+      ]);
+      // Show invite modal
+      setShowCreateLeague(false);
+      setShowInviteModal(true);
+      // Save _id for copying
+      setLeagueCode(idAsCode);
+      setInviteLink(`https://puckyeah.com/join/${idAsCode}`);
+      // Reset input
+      setLeagueName('');
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-    // Close join modal and reset input
-    setShowJoinLeague(false);
-    setJoinCode('');
-
-  } catch (err) {
-    console.error("Error joining league:", err);
-    alert(err.message || "Error joining league");
-  }
-};
-
-  const leaveLeague = async (leagueId) => {
-  if (!currentUser) return;
-
-  try {
-    const res = await fetch(
-      `https://game-on-9bhv.onrender.com/api/leagues/${leagueId}/leave`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ userId: currentUser.id }),
+  {/* Joining a League */}
+  const joinLeague = async () => {
+    if (!currentUser || !joinCode.trim()) return;
+    // Check if user is already in this league
+    const alreadyJoined = leagues.some(league => league.code === joinCode);
+    if (alreadyJoined) {
+      alert("You are already in this league!");
+      return;
+    }
+    try {
+      const res = await fetch(
+        `https://game-on-9bhv.onrender.com/api/leagues/${joinCode}/join`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ userId: currentUser.id }),
+        }
+      );
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to join league");
       }
-    );
+      const data = await res.json();
+      console.log("Joined league:", data);
+      // Add to leagues state only if not already there
+      setLeagues(prev => {
+        const exists = prev.some(l => l.id === data._id);
+        if (exists) return prev;
+        return [
+          ...prev,
+          {
+            id: data._id,
+            name: data.name,
+            members: data.teamIds?.length || 1,
+            maxMembers: data.maxMembers || 12,
+            code: data.code || joinCode,
+            isOwner: data.creatorId === currentUser.id
+          }
+        ];
+      });
+      // Close join modal and reset input
+      setShowJoinLeague(false);
+      setJoinCode('');
+    } catch (err) {
+      console.error("Error joining league:", err);
+      alert(err.message || "Error joining league");
+    }
+  };
 
-    if (!res.ok) throw new Error("Failed to leave league");
+  {/* Leaving a League */}
+  const leaveLeague = async (leagueId) => {
+    if (!currentUser) return;
+    try {
+      const res = await fetch(
+        `https://game-on-9bhv.onrender.com/api/leagues/${leagueId}/leave`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ userId: currentUser.id }),
+        }
+      );
+      if (!res.ok) throw new Error("Failed to leave league");
+      setLeagues(prevLeagues => prevLeagues.filter(l => l.id !== leagueId));
+      // Close the modal
+      setShowLeagueDetails(false);
+      setSelectedLeague(null);
+      console.log("Successfully left league:", leagueId);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-    // Remove the league from the local leagues state
-    setLeagues(prevLeagues => prevLeagues.filter(l => l.id !== leagueId));
-
-    // Close the modal
-    setShowLeagueDetails(false);
-
-    // Clear the selected league
-    setSelectedLeague(null);
-
-    console.log("Successfully left league:", leagueId);
-  } catch (err) {
-    console.error(err);
-  }
-};
-
-
+  {/* League Details */}
   const openLeagueDetails = (league) => {
     setSelectedLeague(league);
-
-    // tell App.js which league/team are selected
     setLeagueId(league.id);
-    setTeamId("TEMP_TEAM_ID"); // replace with real team id once available
-
+    setTeamId("TEMP_TEAM_ID");
     setShowLeagueDetails(true);
   };
 
+  {/* Copying to Clipboard */}
   const copyToClipboard = (text, type) => {
     navigator.clipboard.writeText(text);
     if (type === 'code') {
@@ -220,16 +192,16 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
     }
   };
 
+  {/* Logout */}
   const handleLogout = () => {
     localStorage.removeItem('token');
     navigate('/');
   };
 
-  // Fetch leagues from backend
+  {/* Fetch Leagues from Backend */}
   useEffect(() => {
     const fetchLeagues = async () => {
       if (!currentUser || !token) return;
-
       try {
         const res = await fetch(`https://game-on-9bhv.onrender.com/api/leagues/${currentUser.id}/leagues`, {
           headers: {
@@ -238,14 +210,13 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
         });
         if (!res.ok) throw new Error('Failed to fetch leagues');
         const data = await res.json();
-
         // Map the backend league data to match the fields used in component
         const mappedLeagues = data.leagues.map(league => ({
           id: league._id,
           name: league.name,
           members: league.teamIds?.length || 0,
-          maxMembers: league.maxMembers || 12, // default if not stored
-          code: league.code || league._id.substring(0, 6).toUpperCase(), // fallback code
+          maxMembers: league.maxMembers || 12, 
+          code: league.code || league._id.substring(0, 6).toUpperCase(),
           isOwner: league.creatorId?._id === currentUser.id
         }));
         setLeagues(mappedLeagues);
@@ -257,21 +228,12 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
     fetchLeagues();
   }, [currentUser, token]);
 
-  // const mockMatchups = [
-  //   { id: 1, opponent: "Sarah M.", date: "Oct 15", status: "upcoming", myScore: 0, opponentScore: 0 },
-  //   { id: 2, opponent: "Alex K.", date: "Oct 12", status: "won", myScore: 142, opponentScore: 128 },
-  //   { id: 3, opponent: "Jordan T.", date: "Oct 8", status: "lost", myScore: 115, opponentScore: 134 }
-  // ];
-
-  // Fetch matchups from backend
+  {/* Fetch matchups from backend */}
   useEffect(() => {
     const fetchMatchups = async () => {
-
       console.log("Fetching matchups for user:", currentUser);
-
       // If user or token missing, skip
       if (!currentUser || !token) return;
-
       try {
         const res = await fetch(
           `https://game-on-9bhv.onrender.com/api/matchups/user/${currentUser.id}`,
@@ -285,22 +247,10 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
         if (!res.ok) throw new Error('Failed to fetch matchups');
         const data = await res.json();
         console.log("Matchups response JSON", data);
-
-        // Map backend → frontend shape
-        // const mappedMatchups = data.matchups.map(match => ({
-        //   id: match._id,
-        //   opponent: match.teamAId._id === currentUser.teamId ? match.teamBId.name : match.teamAId.name,
-        //   myScore: match.teamAId._id === currentUser.teamId ? match.scoreA : match.scoreB,
-        //   opponentScore: match.teamAId._id === currentUser.teamId ? match.scoreB : match.scoreA,
-        //   status: match.status,
-        //   week: match.week,
-        //   date: match.createdAt
-        // }));
         const mappedMatchups = data.matchups.map((match) => {
           const isTeamA = match.teamAId?._id === currentUser.teamId;
           const myTeam = isTeamA ? match.teamAId : match.teamBId;
           const opponentTeam = isTeamA ? match.teamBId : match.teamAId;
-
           console.log("Mapping matchup:", {
             myTeam: myTeam?.name,
             opponentTeam: opponentTeam?.name,
@@ -308,10 +258,8 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
             scoreB: match.scoreB,
             status: match.status,
           });
-
           return {
             id: match._id,
-            // ✅ Combine both team names for the modal
             opponent: `${myTeam?.name || "My Team"} VS ${opponentTeam?.name || "Unknown Team"}`,
             myScore: isTeamA ? match.scoreA : match.scoreB,
             opponentScore: isTeamA ? match.scoreB : match.scoreA,
@@ -320,17 +268,13 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
             date: match.createdAt ? new Date(match.createdAt).toISOString().split('T')[0] : "Unknown Date"
           };
         });
-
-
         setMatchups(mappedMatchups);
       } catch (err) {
         console.error(err);
       }
     };
-
     fetchMatchups();
   }, [currentUser, token]);
-
 
   return (
     <>
@@ -383,7 +327,7 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
         {/* Main Content */}
         <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
 
-          {/* Quick Stats */}
+          {/* Quick Stats - Demo */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 animate-fade-in">
             <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 text-center transform hover:scale-105 transition-all duration-300">
               <Trophy className="w-8 h-8 text-yellow-400 mx-auto mb-2" />
@@ -409,6 +353,7 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
 
           {/* Create & Join League Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+
             {/* Create League */}
             <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 animate-slide-up">
               <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
@@ -539,7 +484,6 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
               </div>
             </div>
           </div>
-
         </div>
       </div>
 
@@ -612,11 +556,11 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
               <p className="text-purple-200 mb-2">League Code:</p>
               <div className="flex items-center justify-between bg-white/10 p-2 rounded-lg border border-white/20">
                 <span className="text-white text-sm truncate">{leagueCode}</span>
-                <button 
+                <button
                   onClick={() => copyToClipboard(leagueCode, 'code')}
                   className="text-purple-300 hover:text-white"
-                  >
-                    {copiedCode ? 'Copied!' : 'Copy'}
+                >
+                  {copiedCode ? 'Copied!' : 'Copy'}
                 </button>
               </div>
             </div>
