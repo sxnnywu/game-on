@@ -40,10 +40,12 @@ const PlayerDraft = () => {
   // fetch players from backend
   useEffect(() => {
     const fetchPlayers = async () => {
+      console.log("Fetching players...");
       try {
         setLoading(true);
+        console.log("Using token:", token);
         const response = await fetch(`https://game-on-9bhv.onrender.com/api/players`);
-
+        console.log("Response status:", response.status);
         if (!response.ok) throw new Error("Failed to fetch players");
 
         const data = await response.json();
@@ -359,8 +361,7 @@ const PlayerDraft = () => {
                 <tr className="bg-white/5 border-b border-white/10">
                   {[
                     'Name', 'Team', 'Position', 'Status', 'Draft Status',
-                    'Goals (Week)', 'Assists (Week)', 'Saves (Week)',
-                    'Total Goals', 'Total Assists', 'Total Saves', 'Created'
+                    'Goals', 'Assists', 'Saves', 'Created'
                   ].map(header => (
                     <th key={header} className="px-2 sm:px-4 py-3 sm:py-4 text-left text-white font-semibold whitespace-nowrap">
                       {header}
@@ -393,32 +394,17 @@ const PlayerDraft = () => {
                     ))}</td>
                     <td className="px-2 sm:px-4 py-3 sm:py-4 text-center">
                       <span className="text-green-400 font-semibold">
-                        {player.statsFromThisWeek?.goals || 0}
+                        {player.lastSeasonStats?.goals || 0}
                       </span>
                     </td>
                     <td className="px-2 sm:px-4 py-3 sm:py-4 text-center">
                       <span className="text-blue-400 font-semibold">
-                        {player.statsFromThisWeek?.assists || 0}
+                        {player.lastSeasonStats?.assists || 0}
                       </span>
                     </td>
                     <td className="px-2 sm:px-4 py-3 sm:py-4 text-center">
                       <span className="text-purple-400 font-semibold">
-                        {player.statsFromThisWeek?.saves || 0}
-                      </span>
-                    </td>
-                    <td className="px-2 sm:px-4 py-3 sm:py-4 text-center">
-                      <span className="text-green-300 font-medium">
-                        {player.stats?.goals || 0}
-                      </span>
-                    </td>
-                    <td className="px-2 sm:px-4 py-3 sm:py-4 text-center">
-                      <span className="text-blue-300 font-medium">
-                        {player.stats?.assists || 0}
-                      </span>
-                    </td>
-                    <td className="px-2 sm:px-4 py-3 sm:py-4 text-center">
-                      <span className="text-purple-300 font-medium">
-                        {player.stats?.saves || 0}
+                        {player.lastSeasonStats?.saves || 0}
                       </span>
                     </td>
                     <td className="px-2 sm:px-4 py-3 sm:py-4 text-white/60 text-xs sm:text-sm">
