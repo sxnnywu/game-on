@@ -28,7 +28,7 @@ router.post('/signup', async (req, res) => {
         });
 
         await newUser.save();
-        res.status(201).json({ message: 'User created successfully' }, {user: newUser});
+        res.status(201).json({ message: 'User created successfully' }, {userID: newUser.id});
     } 
     catch (err) {
         console.error(err);
@@ -57,7 +57,7 @@ router.post('/login', async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: '1d' }
         );
-        res.json({ token }, {user: user});
+        res.json({ token }, {userID: newUser.id});
     } 
     catch (err) {
         console.error(err);
