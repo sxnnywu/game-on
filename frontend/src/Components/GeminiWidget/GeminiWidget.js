@@ -11,7 +11,13 @@ const GeminiWidget = () => {
     try {
       const response = await fetch('https://game-on-9bhv.onrender.com/api/gemini');
       const data = await response.json();
-      setCommentary(data.commentary);
+
+      // Handle array structure safely
+      if (Array.isArray(data.commentary) && data.commentary.length > 0) {
+        setCommentary(data.commentary[0].text);
+      } else {
+        setCommentary('No commentary available.');
+      }
     } catch (error) {
       setCommentary('Failed to fetch commentary.');
     } finally {
@@ -20,7 +26,6 @@ const GeminiWidget = () => {
   };
 
   const toggleExpanded = () => {
-    // If we're opening the commentary, fetch new data
     if (!expanded) {
       fetchCommentary();
     }
@@ -31,7 +36,7 @@ const GeminiWidget = () => {
     <div className={`gemini-fab-container ${expanded ? 'expanded' : ''}`}>
       <button className="gemini-fab" onClick={toggleExpanded}>
         <span><img src="/assets/MrPuck.png" alt="MrPuck" width={40} height={40}/></span>
-        <span className="fab-label">Hear Mr. Puck's Commentary</span>
+        <span className="fab-label">Hear Ms. Puck&apos;s Commentary</span>
       </button>
 
       {expanded && (

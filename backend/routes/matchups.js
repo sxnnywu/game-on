@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Matchup = require('../models/Matchup');
+const User = require('../models/User');
 
 // Get matchup by ID
 router.get('/:id', async (req, res) => {
@@ -65,6 +66,34 @@ router.get('/:id/score', async (req, res) => {
         console.error(err);
         res.status(500).json({ error: 'Server error' });
     }
+});
+
+// Get all matchups for a given user (across all leagues)
+router.get('/user/:userId', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    // find the user
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // get leagues the user is in
+    const leagueIds = user.leagues;
+    if (!leagueIds || leagueIds.length === 0) {
+      return res.status(200).json({ matchups: [] });
+    }
+
+    // find all matchups in those leagues
+    const matchups = await Matchup.find({ leagueId: { $in: leagueIds } })
+    .populate('teamAId')
+    .populate('teamBId')
+    .populate('leagueId');
+
+    res.status(200).json({ matchups });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
 module.exports = router;

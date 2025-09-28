@@ -23,12 +23,17 @@ const PlayerDraft = () => {
     const fetchPlayers = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/players`);
+        console.log("loading is true");
+        const response = await fetch(`https://game-on-9bhv.onrender.com/api/players`);
         
+        console.log("fetch complete");
         if (!response.ok) throw new Error("Failed to fetch players");
+        console.log("fetch okay");
         
         const data = await response.json();
-        let player = JSON.parse(data)
+        console.log("json awaited");
+        //let player = JSON.parse(data)
+        console.log(data)
         
         setPlayers(data);
         setError(null);
@@ -194,7 +199,10 @@ const PlayerDraft = () => {
                   onChange={(e) => setSelectedPosition(e.target.value)}
                   className="w-full sm:w-auto pl-9 sm:pl-10 pr-6 sm:pr-8 py-2 bg-white/10 border border-white/30 rounded-lg sm:rounded-xl text-white text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none cursor-pointer"
                 >
-                  <option value="all">All Positions</option>
+                  <option value="all" className="text-black">All Positions</option>
+                  <option value="goalie" className="text-black">Goalies</option>
+                  <option value="forward" className="text-black">Forwards</option>
+                  <option value="defence" className="text-black">Defenders</option>
                   {positions.map(position => (
                     <option key={position} value={position} className="bg-purple-900">
                       {position}
