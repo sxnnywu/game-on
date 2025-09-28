@@ -54,67 +54,102 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
     setInviteLink(link);
   };
 
-  // create league
   const createLeagueInDB = async () => {
-    if (!leagueName.trim() || !currentUser) return;
+  if (!leagueName.trim() || !currentUser) return;
 
-    generateLeagueCode();
+  const leagueData = {
+    name: leagueName,
+    creatorId: currentUser.id,
+    // Remove code & link here if you want to rely on _id
+  };
+
+  try {
+    const res = await fetch('https://game-on-9bhv.onrender.com/api/leagues', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(leagueData)
+    });
+
+    if (!res.ok) throw new Error('Failed to create league');
+    const data = await res.json();
+    console.log('League created:', data);
+
+    // Use MongoDB _id as the code
+    const idAsCode = data._id;
+
+    setLeagues(prev => [
+      ...prev,
+      {
+        id: data._id,
+        name: data.name,
+        members: 0,
+        maxMembers: data.maxMembers || 12,
+        code: idAsCode, // Show _id to user
+        isOwner: true
+      }
+    ]);
+
+    // Show invite modal
     setShowCreateLeague(false);
     setShowInviteModal(true);
 
-    const leagueData = {
-      name: leagueName,
-      creatorId: currentUser.id,
-      code: leagueCode,
-      link: inviteLink
-    };
+    // Save _id for copying
+    setLeagueCode(idAsCode);
+    setInviteLink(`https://puckyeah.com/join/${idAsCode}`);
 
-    try {
-      console.log("Creating league with data:", leagueData);
-      const res = await fetch('https://game-on-9bhv.onrender.com/api/leagues', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(leagueData)
-      });
-      console.log("Create league response:", res);
-      if (!res.ok) throw new Error('Failed to create league');
-      const data = await res.json();
-      console.log('League created:', data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+    // Reset input
+    setLeagueName('');
+  } catch (err) {
+    console.error(err);
+  }
+};
 
-  // join league
   const joinLeague = async () => {
-    if (!currentUser || !joinCode.trim()) return;
+  if (!currentUser || !joinCode.trim()) return;
 
-    console.log("Attempting to join league with code:", joinCode);
+  console.log("Attempting to join league with code:", joinCode);
 
-    try {
-      const res = await fetch(
-        `https://game-on-9bhv.onrender.com/api/leagues/${joinCode}/join`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ userId: currentUser.id }),
-        }
-      );
-      console.log("Join response:", res);
+  try {
+    const res = await fetch(
+      `https://game-on-9bhv.onrender.com/api/leagues/${joinCode}/join`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ userId: currentUser.id }),
+      }
+    );
 
-      if (!res.ok) throw new Error("Failed to join league");
-      const data = await res.json();
-      console.log("Joined league:", data);
-    } catch (err) {
-      console.error("Error:", err);
-    }
-  };
+    if (!res.ok) throw new Error("Failed to join league");
+    const data = await res.json();
+    console.log("Joined league:", data);
+
+    // ✅ Update leagues state locally
+    setLeagues(prev => [
+      ...prev,
+      {
+        id: data._id,
+        name: data.name,
+        members: data.teamIds?.length || 1, // default 1 if backend doesn't return
+        maxMembers: data.maxMembers || 12,
+        code: data.code || joinCode,
+        isOwner: data.creatorId === currentUser.id
+      }
+    ]);
+
+    // ✅ Close join modal
+    setShowJoinLeague(false);
+    setJoinCode('');
+
+  } catch (err) {
+    console.error("Error:", err);
+  }
+};
 
   const leaveLeague = async (leagueId) => {
     console.log("Attempting to leave league with ID:", leagueId);
@@ -561,10 +596,8 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
               <p className="text-purple-200 mb-2">League Code:</p>
               <div className="flex items-center justify-between bg-white/10 p-2 rounded-lg border border-white/20">
                 <span className="text-white">{leagueCode}</span>
-                <button
-                  onClick={() => copyToClipboard(leagueCode, 'code')}
-                  className="text-purple-300 hover:text-white"
-                >
+                <span className="text-white">{leagueCode}</span>
+                <button onClick={() => copyToClipboard(leagueCode, 'code')}>
                   {copiedCode ? 'Copied!' : 'Copy'}
                 </button>
               </div>
