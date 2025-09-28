@@ -1,4 +1,5 @@
-## Project Overview / Summary ✨
+# Puck Yeah!
+## Project Overview ✨
 Men’s sports dominate the fantasy world – so we built one for women. Puck Yeah! is a fantasy league web app built to give women’s hockey the spotlight it deserves. Despite the popularity of the PWHL (North America’s biggest women’s hockey league!) in Canada and worldwide, our team saw the lack of structured platforms for fans to connect and for the incredible players that drive the team's efforts. We decided to build Puck Yeah!, a fun, (slightly) competitive application where fans can create their own fantasy leagues, featuring an AI commentator (Ms. Puck) and real stats scraped from the PWHL website.
 
 _“When a women’s sports story does appear, it is usually a case of ‘one and done,’ a single story obscured by a cluster of men’s stories that precede it, follow it, and are longer in length.”_
@@ -9,7 +10,7 @@ We built Puck Yeah! to address the underrepresentation of women’s sports in me
 
 Through Puck Yeah!, we aim to amplify the successes of female athletes, increase fan engagement, and challenge the “one and done” trend in sports coverage. Women’s hockey is here to stay, and fans should be afforded the same online spaces as men’s hockey fans.
 
-## What It Does / Features ⭐
+## Features ⭐
 
 Puck Yeah! is a hub for all things PWHL:
 - Authentication System – Full-stack user registration, login, and session management.
@@ -17,20 +18,20 @@ Puck Yeah! is a hub for all things PWHL:
 - Team View – Detailed roster display with active lineup, bench, and player stats.
 - Draft Engine – Prototyped player draft with search, filtering, and turn-based control logic.
 - AI Integration – Google Gemini API powering Ms. Puck, a real-time AI commentator.
-## How It Works / Technical Details ⚙️
+## Technical Details ⚙️
 We built Puck Yeah! as a full-stack web application using:
 - Front End: React.js, Tailwind CSS
 - Back End: Node.js and Express, MongoDB, Render, REST APISs,  JWT-based auth
 - Data Integration: Pulling up-to-date statistics from the PWHL API
 - AI Integration: Google Gemini API for Ms. Puck
 - Notable libraries: Axios, Mongoose, React Router, Lucide Icons
-## Challenges / Lessons Learned 🧠
+## Challenges & Lessons Learned 🧠
 For the majority of our team, this project was our team’s first experience with full-stack development. Key challenges included:
 - Connecting frontend and backend for the first time
 - Debugging data scraping and API integration issues
 - Learning to structure a database and endpoints effectively
 Through pair-programming, and with guidance from our mentors (shoutout Trinity and Rita!), we debugged the issues step by step and successfully integrated the two sides of the application. This allowed us to achieve full end-to-end functionality and gave us the confidence to tackle similar challenges in the future.
-## Future Plans / Next Steps 🚀
+## Future Plans 🚀
 
 We plan to:
 - Improve drafting room functionalities for a smoother user experience
