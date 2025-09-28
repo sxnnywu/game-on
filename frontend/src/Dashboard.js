@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Users, Trophy, Plus, Copy, Share2, Crown, Calendar, Target, Zap, Settings, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const Dashboard = () => {
+const Dashboard = ({ setLeagueId, setTeamId }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [token, setToken] = useState(null);
   const [puckPosition, setPuckPosition] = useState(0);
@@ -126,8 +126,13 @@ const Dashboard = () => {
   };
 
   const openLeagueDetails = (league) => {
-    setSelectedLeague(league);
-    setShowLeagueDetails(true);
+  setSelectedLeague(league);
+
+  // tell App.js which league/team are selected
+  setLeagueId(league.id); 
+  setTeamId("TEMP_TEAM_ID"); // replace with real team id once available
+
+  setShowLeagueDetails(true);
   };
 
   const copyToClipboard = (text, type) => {
