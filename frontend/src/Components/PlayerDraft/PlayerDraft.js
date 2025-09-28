@@ -42,12 +42,12 @@ const PlayerDraft = () => {
       try {
         setLoading(true);
         const response = await fetch(`https://game-on-9bhv.onrender.com/api/players`);
-        
+
         if (!response.ok) throw new Error("Failed to fetch players");
-        
+
         const data = await response.json();
         console.log("Fetched players:", data);
-        
+
         setPlayers(data);
         setError(null);
       } catch (err) {
@@ -69,9 +69,8 @@ const PlayerDraft = () => {
   const positions = [...new Set(players.map(p => p.position))];
 
   const getStatusBadge = (status) => (
-    <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-medium ${
-      status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-    }`}>
+    <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-medium ${status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+      }`}>
       {status ? "Active" : "Inactive"}
     </span>
   );
@@ -107,12 +106,12 @@ const PlayerDraft = () => {
     );
   }
 
-  const draftNextStep = async ()  => {
+  const draftNextStep = async () => {
     const leagueID = currentUser.leagues[0];
     const response = await fetch(`https://game-on-9bhv.onrender.com/api/legaue/${leagueID}/draft`);
     const DraftInfo = response.json();
 
-    
+
   }
 
   return (
@@ -133,8 +132,8 @@ const PlayerDraft = () => {
             <Users className="w-4 h-4" />
             <span className="text-xs sm:text-sm">{players.length} Players</span>
           </div>
-          <a 
-            href="/" 
+          <a
+            href="/"
             className="text-white text-sm sm:text-base font-semibold hover:text-purple-300 transition-colors px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-white/10"
           >
             Home
@@ -154,10 +153,10 @@ const PlayerDraft = () => {
               {logos.map((logo, index) => (
                 <div key={index} className="group cursor-pointer">
                   <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-lg sm:rounded-xl bg-gradient-to-br from-white/20 to-white/5 border border-white/30 flex items-center justify-center overflow-hidden hover:scale-105 transition-transform duration-300 hover:border-purple-400/50">
-                    <img 
-                      src={logo} 
-                      alt={`Team ${index + 1}`} 
-                      className="w-full h-full object-cover" 
+                    <img
+                      src={logo}
+                      alt={`Team ${index + 1}`}
+                      className="w-full h-full object-cover"
                     />
                   </div>
                   <div className="text-white/70 text-xs text-center mt-1 sm:mt-2 group-hover:text-white transition-colors">
@@ -246,12 +245,16 @@ const PlayerDraft = () => {
                     {player.position}
                   </span>
                 </div>
-                
+
                 <div className="flex gap-2 mb-3">
                   {getStatusBadge(player.status)}
-                  {getDraftStatusBadge(player.draftStatus)}
+                  {player.draftStatus.map((draft, i) => (
+                    <React.Fragment key={i}>
+                      {getDraftStatusBadge(draft.status.charAt(0).toUpperCase() + draft.status.slice(1))}
+                    </React.Fragment>
+                  ))}
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-white/70">Week Goals:</span>
@@ -292,11 +295,10 @@ const PlayerDraft = () => {
               </thead>
               <tbody>
                 {filteredPlayers.map((player, index) => (
-                  <tr 
-                    key={player._id} 
-                    className={`border-b border-white/5 hover:bg-white/5 transition-colors ${
-                      index % 2 === 0 ? 'bg-white/2' : ''
-                    }`}
+                  <tr
+                    key={player._id}
+                    className={`border-b border-white/5 hover:bg-white/5 transition-colors ${index % 2 === 0 ? 'bg-white/2' : ''
+                      }`}
                   >
                     <td className="px-2 sm:px-4 py-3 sm:py-4">
                       <div className="font-medium text-white">{player.name}</div>
@@ -308,7 +310,11 @@ const PlayerDraft = () => {
                       </span>
                     </td>
                     <td className="px-2 sm:px-4 py-3 sm:py-4">{getStatusBadge(player.status)}</td>
-                    <td className="px-2 sm:px-4 py-3 sm:py-4">{getDraftStatusBadge(player.draftStatus)}</td>
+                    <td className="px-2 sm:px-4 py-3 sm:py-4">{player.draftStatus.map((draft, i) => (
+                      <React.Fragment key={i}>
+                        {getDraftStatusBadge(draft.status.charAt(0).toUpperCase() + draft.status.slice(1))}
+                      </React.Fragment>
+                    ))}</td>
                     <td className="px-2 sm:px-4 py-3 sm:py-4 text-center">
                       <span className="text-green-400 font-semibold">
                         {player.statsFromThisWeek?.goals || 0}
