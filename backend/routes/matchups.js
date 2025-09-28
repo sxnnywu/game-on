@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Matchup = require('../models/Matchup');
+const User = require('../models/User');
 
 // Get matchup by ID
 router.get('/:id', async (req, res) => {
