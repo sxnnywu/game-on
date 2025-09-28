@@ -23,6 +23,12 @@ const userSchema = new mongoose.Schema({
             ref: 'League'
         }
     ],
+    teams: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Team'
+        }
+    ],
     createdAt: {
         type: Date,
         default: Date.now

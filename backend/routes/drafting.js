@@ -52,8 +52,7 @@ router.post('/:id/draft/pick', async (req, res) => {
     const { teamId, playerId } = req.body;
 
     // if missing params
-    if (!leagueId || !teamId || !playerId)
-        return res.status(400).json({ error: 'Missing leagueId, teamId, or playerId' });
+    if (!leagueId || !teamId || !playerId) return res.status(400).json({ error: 'Missing leagueId, teamId, or playerId' });
 
     try {
 
@@ -66,7 +65,7 @@ router.post('/:id/draft/pick', async (req, res) => {
             return res.status(400).json({ error: 'Draft is not in progress' });
 
         // check if it's this team's turn
-        if (league.currentTurn.toString() !== teamId)
+        if (league.currentTurn.currentPick.toString() !== teamId)
             return res.status(400).json({ error: 'Not this team’s turn' });
 
         // check if player is in pool
@@ -94,15 +93,15 @@ router.post('/:id/draft/pick', async (req, res) => {
 
         // if we completed a full round, increment round
         if (currentIndex === 0)
-            league.round += 1;
+            league.currentTurn.round += 1;
         await league.save();
 
         // respond with updated draft state
         res.status(200).json({
             message: 'Player drafted successfully',
             draftedPlayer: playerId,
-            nextTurn: league.currentTurn,
-            round: league.round,
+            nextTurn: league.currentTurn.currentPick,
+            round: league.currentTurn.round,
             remainingPlayerPool: league.playerPool.length
         });
     }

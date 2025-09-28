@@ -18,6 +18,21 @@ const PlayerDraft = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPosition, setSelectedPosition] = useState("all");
+  const [currentUser, setCurrentUser] = useState(null);
+  const [token, setToken] = useState(null);
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem('token');
+    if (storedToken) {
+      try {
+        const decoded = jwtDecode(storedToken);
+        setCurrentUser(decoded);
+        setToken(storedToken);
+      } catch (err) {
+        console.error("Invalid token", err);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const fetchPlayers = async () => {
@@ -32,7 +47,6 @@ const PlayerDraft = () => {
         
         const data = await response.json();
         console.log("json awaited");
-        //let player = JSON.parse(data)
         console.log(data)
         
         setPlayers(data);
@@ -95,6 +109,14 @@ const PlayerDraft = () => {
     );
   }
 
+  const draftNextStep = async ()  => {
+    const leagueID = currentUser.league[0];
+    const response = await fetch(`https://game-on-9bhv.onrender.com/api/legaue/${leagueID}/draft`);
+    constDraftInfo = response.json();
+
+    
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 p-3 sm:p-4 lg:p-6">
       {/* Enhanced Navbar */}
@@ -104,7 +126,7 @@ const PlayerDraft = () => {
             <Zap className="w-6 sm:w-8 h-6 sm:h-8 text-white" />
           </div>
           <div>
-            <span className="text-white text-xl sm:text-2xl font-bold tracking-wide">GAMEON</span>
+            <span className="text-white text-xl sm:text-2xl font-bold tracking-wide">PUCK YEAH!</span>
             <div className="text-purple-200 text-xs sm:text-sm">Player Draft</div>
           </div>
         </div>
@@ -340,16 +362,17 @@ const PlayerDraft = () => {
 
       {/* Enhanced Continue Button */}
       <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4">
-        <div className="text-white/60 text-xs sm:text-sm">
+        <div></div>
+        <div className="text-white/60 text-xs sm:text-sm justify-center">
           Showing {filteredPlayers.length} of {players.length} players
         </div>
-        <a
-          href="/next-page"
-          className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg sm:rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 flex items-center justify-center sm:justify-start gap-2 text-sm sm:text-base"
-        >
-          Continue to Next Step
+        <div></div>
+        <div className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg sm:rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 flex items-center justify-center sm:justify-start gap-2 text-sm sm:text-base">
+          <button OnClick={draftNextStep()}>
+            Continue to Next Step
+          </button>
           <Zap className="w-4 h-4" />
-        </a>
+        </div>
       </div>
     </div>
   );

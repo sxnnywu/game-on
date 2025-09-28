@@ -7,25 +7,26 @@ const League = require('../models/League');
 
 // get team roster
 router.get('/:id', async (req, res) => {
-    const {leagueID} = req.query;
-    const userID = req.params.id;
+  const teamId = req.params.id;
+  const leagueId = req.query.leagueID;
+  const userId = req.query.userID; // optional if you want to verify ownership
 
-    if (!userId || !leagueId) {
-        return res.status(400).json({ error: 'Missing userId or leagueId' });
+  if (!teamId || !leagueId) {
+    return res.status(400).json({ error: 'Missing teamId or leagueId' });
+  }
+
+  try {
+    const team = await Team.findOne({ _id: teamId, leagueId });
+
+    if (!team) {
+      return res.status(404).json({ error: 'Team not found' });
     }
 
-    try {
-        const team = await Team.findOne({ _id: req.params.id, ownerId: userId, leagueId: leagueId });
-
-        if(!team) {
-            return res.status(404).json({ error: 'Team not found' });
-        }
-
-        res.status(200).json({ players: team.roster });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Server error' });
-    }
+    res.status(200).json({ players: team.roster });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // update starting lineup
