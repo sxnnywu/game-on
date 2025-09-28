@@ -112,16 +112,17 @@ const MyTeam = ({ userId, leagueId, teamId }) => {
     setSelectedPlayer(null);
   };
 
-  const movePlayerToLineup = (player) => {
-    if (lineup.length >= 12) { // Max lineup size
-      setError('Lineup is full (12 players max)');
-      return;
-    }
-    
-    setLineup(prev => [...prev, player]);
-    setBench(prev => prev.filter(p => (p._id || p.id) !== (player._id || player.id)));
-    setSelectedPlayer(null);
-  };
+const movePlayerToLineup = (player) => {
+  if (lineup.length >= 23) { 
+    setError('Lineup is full (23 players max)');
+    return;
+  }
+  
+  setLineup(prev => [...prev, player]);
+  setBench(prev => prev.filter(p => (p._id || p.id) !== (player._id || player.id)));
+  setSelectedPlayer(null);
+};
+
 
   const movePlayerToBench = (player) => {
     setBench(prev => [...prev, player]);
@@ -288,7 +289,7 @@ const MyTeam = ({ userId, leagueId, teamId }) => {
               </div>
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">PUCK<span className="text-purple-300">DRAFT</span></h1>
+              <h1 className="text-2xl font-bold text-white">Puck<span className="text-purple-300"> Yeah!</span></h1>
               <p className="text-purple-200 text-sm">My Team</p>
             </div>
           </div>
@@ -360,7 +361,7 @@ const MyTeam = ({ userId, leagueId, teamId }) => {
                   <Users className="w-6 h-6 mr-3 text-green-400" />
                   Starting Lineup
                 </h2>
-                <span className="text-purple-200 text-sm">{lineup.length}/12 players</span>
+                <span className="text-purple-200 text-sm">{lineup.length}/23 players</span>
               </div>
               
               {lineup.length === 0 ? (

@@ -110,29 +110,38 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
   };
 
   const leaveLeague = async (leagueId) => {
-    console.log("Attempting to leave league with ID:", leagueId);
-    if (!currentUser) return;
+  console.log("Attempting to leave league with ID:", leagueId);
+  if (!currentUser) return;
 
-    try {
-      console.log("Sending leave request for league ID:", leagueId);
-      const res = await fetch(
-        `https://game-on-9bhv.onrender.com/api/leagues/${leagueId}/leave`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ userId: currentUser.id }),
-        }
-      );
-      console.log("Leave response:", res);
-      if (!res.ok) throw new Error("Failed to leave league");
-    } 
-    catch (err) {
-      console.error(err);
-    }
-  };
+  try {
+    const res = await fetch(
+      `https://game-on-9bhv.onrender.com/api/leagues/${leagueId}/leave`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ userId: currentUser.id }),
+      }
+    );
+
+    if (!res.ok) throw new Error("Failed to leave league");
+
+    // ✅ Update state locally instead of full page reload
+    setLeagues(prevLeagues => prevLeagues.filter(l => l.id !== leagueId));
+
+    // ✅ Close modal
+    setShowLeagueDetails(false);
+    setSelectedLeague(null);
+
+    console.log("Successfully left league:", leagueId);
+  } 
+  catch (err) {
+    console.error(err);
+  }
+};
+
 
   const openLeagueDetails = (league) => {
   setSelectedLeague(league);
@@ -364,7 +373,7 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
           </div>
 
           {/* Recent Matchups */}
-          <div className="max-w-[77rem] mx-auto -mt-8">
+          <div className="max-w-[77rem] mx-auto -mt-0">
             <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 mb-8 animate-slide-up">
               <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
                 <Calendar className="w-6 h-6 mr-3 text-purple-300" />
