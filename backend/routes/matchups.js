@@ -88,6 +88,7 @@ router.get('/user/:userId', async (req, res) => {
     .populate('teamAId')
     .populate('teamBId')
     .populate('leagueId');
+    console.log("Matchups found for user:", matchups);
 
     res.status(200).json({ matchups });
   } catch (err) {

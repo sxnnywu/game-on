@@ -5,6 +5,7 @@ const router = express.Router();
 const League = require('../models/League');
 const User = require('../models/User');
 const Team = require('../models/Team');
+const Player = require('../models/Player');
 
 // Create a new league
 router.post('/', async (req, res) => {
@@ -31,7 +32,7 @@ router.post('/', async (req, res) => {
       createdAt: new Date()
     });
 
-    draftablePlayers = Player.find({status: true});
+    draftablePlayers = await Player.find({status: true});
     draftablePlayers.forEach(async player => {
       newLeague.playerPool.push(player._id);
       player.draftStatus.push([newLeague._id, "available"]);
