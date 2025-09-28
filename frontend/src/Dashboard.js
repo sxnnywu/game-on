@@ -19,6 +19,7 @@ const Dashboard = () => {
   const [selectedLeague, setSelectedLeague] = useState(null);
   const [joinCode, setJoinCode] = useState('');
   const [leagues, setLeagues] = useState([]);
+  const [matchups, setMatchups] = useState([]);
   const navigate = useNavigate();
 
   // Animated puck movement
@@ -43,8 +44,8 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-  console.log("Current user in dashboard:", currentUser);
-}, [currentUser]);
+    console.log("Current user in dashboard:", currentUser);
+  }, [currentUser]);
 
   const generateLeagueCode = () => {
     const code = Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -88,6 +89,8 @@ const Dashboard = () => {
   const joinLeague = async () => {
     if (!currentUser || !joinCode.trim()) return;
 
+    console.log("Attempting to join league with code:", joinCode);
+
     try {
       const res = await fetch(
         `https://game-on-9bhv.onrender.com/api/leagues/${joinCode}/join`,
@@ -100,6 +103,7 @@ const Dashboard = () => {
           body: JSON.stringify({ userId: currentUser.id }),
         }
       );
+      console.log("Join response:", res);
 
       if (!res.ok) throw new Error("Failed to join league");
       const data = await res.json();
@@ -128,7 +132,7 @@ const Dashboard = () => {
       );
       console.log("Leave response:", res);
       if (!res.ok) throw new Error("Failed to leave league");
-    } 
+    }
     catch (err) {
       console.error(err);
     }
@@ -157,41 +161,83 @@ const Dashboard = () => {
 
   // Fetch leagues from backend
   useEffect(() => {
-  const fetchLeagues = async () => {
-    if (!currentUser || !token) return;
+    const fetchLeagues = async () => {
+      if (!currentUser || !token) return;
 
-    try {
-      const res = await fetch(`https://game-on-9bhv.onrender.com/api/leagues/${currentUser.id}/leagues`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      if (!res.ok) throw new Error('Failed to fetch leagues');
-      const data = await res.json();
+      try {
+        const res = await fetch(`https://game-on-9bhv.onrender.com/api/leagues/${currentUser.id}/leagues`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (!res.ok) throw new Error('Failed to fetch leagues');
+        const data = await res.json();
 
-      // Map the backend league data to match the fields used in component
-      const mappedLeagues = data.leagues.map(league => ({
-        id: league._id,
-        name: league.name,
-        members: league.teamIds?.length || 0,
-        maxMembers: league.maxMembers || 12, // default if not stored
-        code: league.code || league._id.substring(0, 6).toUpperCase(), // fallback code
-        isOwner: league.creatorId?._id === currentUser.id
-      }));
-      setLeagues(mappedLeagues);
-    } 
-    catch (err) {
-      console.error(err);
-    }
-  };
-  fetchLeagues();
-}, [currentUser, token]);
+        // Map the backend league data to match the fields used in component
+        const mappedLeagues = data.leagues.map(league => ({
+          id: league._id,
+          name: league.name,
+          members: league.teamIds?.length || 0,
+          maxMembers: league.maxMembers || 12, // default if not stored
+          code: league.code || league._id.substring(0, 6).toUpperCase(), // fallback code
+          isOwner: league.creatorId?._id === currentUser.id
+        }));
+        setLeagues(mappedLeagues);
+      }
+      catch (err) {
+        console.error(err);
+      }
+    };
+    fetchLeagues();
+  }, [currentUser, token]);
 
-  const mockMatchups = [
-    { id: 1, opponent: "Sarah M.", date: "Oct 15", status: "upcoming", myScore: 0, opponentScore: 0 },
-    { id: 2, opponent: "Alex K.", date: "Oct 12", status: "won", myScore: 142, opponentScore: 128 },
-    { id: 3, opponent: "Jordan T.", date: "Oct 8", status: "lost", myScore: 115, opponentScore: 134 }
-  ];
+  // const mockMatchups = [
+  //   { id: 1, opponent: "Sarah M.", date: "Oct 15", status: "upcoming", myScore: 0, opponentScore: 0 },
+  //   { id: 2, opponent: "Alex K.", date: "Oct 12", status: "won", myScore: 142, opponentScore: 128 },
+  //   { id: 3, opponent: "Jordan T.", date: "Oct 8", status: "lost", myScore: 115, opponentScore: 134 }
+  // ];
+
+  // Fetch matchups from backend
+  useEffect(() => {
+    const fetchMatchups = async () => {
+
+      console.log("Fetching matchups for user:", currentUser);
+
+      // If user or token missing, skip
+      if (!currentUser || !token) return;
+
+      try {
+        const res = await fetch(
+          `https://game-on-9bhv.onrender.com/api/matchups/user/${currentUser.id}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
+        );
+        console.log("Matchups response:", res);
+        if (!res.ok) throw new Error('Failed to fetch matchups');
+        const data = await res.json();
+        console.log("Matchups response JSON", data);
+
+        // Map backend → frontend shape
+        const mappedMatchups = data.matchups.map(match => ({
+          teamA: match.teamAId,
+          teamB: match.teamBId,
+          scoreA: match.scoreA,
+          scoreB: match.scoreB,
+          status: match.status,
+          week: match.week
+        }));
+        setMatchups(mappedMatchups);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchMatchups();
+  }, [currentUser, token]);
+
 
   return (
     <>
@@ -366,7 +412,7 @@ const Dashboard = () => {
                 Recent Matchups
               </h2>
               <div className="space-y-4">
-                {mockMatchups.map((match) => (
+                {matchups.map((match) => (
                   <div
                     key={match.id}
                     className="cursor-pointer bg-white/10 rounded-2xl p-4 border border-white/10 hover:bg-white/20 transition-all duration-300 transform hover:scale-105"
