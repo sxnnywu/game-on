@@ -112,6 +112,7 @@ router.post('/:id/draft/pick', async (req, res) => {
     }
 });
 
+//generate schedule
 const generateSchedule = (league, seasonWeeks) => {
     const teams = league.teamIds;
     const allMatchups = [];
