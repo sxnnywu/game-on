@@ -5,6 +5,28 @@ const router = express.Router();
 const Team = require('../models/Team');
 const League = require('../models/League');
 
+router.get('/getTeamID/:league/:user', async (req, res) => {
+    const leagueID = req.params.league;
+    const userID = req.params.user;
+
+    if(!userID || !leagueID) {
+        return res.status(400).json({ error: 'Missing userId or leagueId' });
+    }
+
+    try{
+        const team = await Team.findOne({ownerId: userID, leagueId: leagueID});
+        
+        if (!team) {
+            return res.status(404).json({ error: 'Team not found' });
+        }
+
+        res.status(200).json({ team });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+})
+
 // get team roster
 router.get('/:id', async (req, res) => {
   const teamId = req.params.id;

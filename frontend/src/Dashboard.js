@@ -278,8 +278,8 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
 
   {/* My Team Storage */}
   const goToMyTeam = (league) => {
-  setLeagueId(league.id);
-  navigate('/myteam'); 
+    localStorage.setItem('leagueID', league.id);
+    navigate('/myteam'); 
   };
 
   return (
