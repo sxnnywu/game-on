@@ -5,6 +5,7 @@ import Auth from './Components/Auth/Auth';
 import PlayerDraft from './Components/PlayerDraft/PlayerDraft';
 import GeminiWidget from './Components/GeminiWidget/GeminiWidget';
 import MyTeam from './MyTeam';
+import Temp from './Components/Temp/Temp';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -34,6 +35,7 @@ function App() {
               />
             }
           />
+          <Route path="/temp" element={<Temp />} />
         </Routes>
       </Router>
     </>
