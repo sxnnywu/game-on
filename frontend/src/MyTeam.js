@@ -296,7 +296,6 @@ const movePlayerToLineup = (player) => {
             </div>
           </div>
           <div className="text-white text-bold text-xl"><a href="/dashboard">DASHBOARD</a></div>
-          <div className="text-white text-bold text-xl"><a href="/myteam">MY TEAM</a></div>
           <div className="flex items-center space-x-4">
             <button
               onClick={toggleEditMode}
