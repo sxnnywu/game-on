@@ -110,7 +110,12 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
   const joinLeague = async () => {
   if (!currentUser || !joinCode.trim()) return;
 
-  console.log("Attempting to join league with code:", joinCode);
+  // Check if user is already in this league
+  const alreadyJoined = leagues.some(league => league.code === joinCode);
+  if (alreadyJoined) {
+    alert("You are already in this league!"); // You can replace with a nicer toast later
+    return;
+  }
 
   try {
     const res = await fetch(
@@ -125,64 +130,73 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
       }
     );
 
-    if (!res.ok) throw new Error("Failed to join league");
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || "Failed to join league");
+    }
+
     const data = await res.json();
     console.log("Joined league:", data);
 
-    // ✅ Update leagues state locally
-    setLeagues(prev => [
-      ...prev,
-      {
-        id: data._id,
-        name: data.name,
-        members: data.teamIds?.length || 1, // default 1 if backend doesn't return
-        maxMembers: data.maxMembers || 12,
-        code: data.code || joinCode,
-        isOwner: data.creatorId === currentUser.id
-      }
-    ]);
+    // Add to leagues state only if not already there
+    setLeagues(prev => {
+      const exists = prev.some(l => l.id === data._id);
+      if (exists) return prev;
+      return [
+        ...prev,
+        {
+          id: data._id,
+          name: data.name,
+          members: data.teamIds?.length || 1,
+          maxMembers: data.maxMembers || 12,
+          code: data.code || joinCode,
+          isOwner: data.creatorId === currentUser.id
+        }
+      ];
+    });
 
-    // ✅ Close join modal
+    // Close join modal and reset input
     setShowJoinLeague(false);
     setJoinCode('');
 
   } catch (err) {
-    console.error("Error:", err);
+    console.error("Error joining league:", err);
+    alert(err.message || "Error joining league");
   }
 };
 
   const leaveLeague = async (leagueId) => {
-    console.log("Attempting to leave league with ID:", leagueId);
-    if (!currentUser) return;
+  if (!currentUser) return;
 
-    try {
-      const res = await fetch(
-        `https://game-on-9bhv.onrender.com/api/leagues/${leagueId}/leave`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ userId: currentUser.id }),
-        }
-      );
+  try {
+    const res = await fetch(
+      `https://game-on-9bhv.onrender.com/api/leagues/${leagueId}/leave`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ userId: currentUser.id }),
+      }
+    );
 
-      if (!res.ok) throw new Error("Failed to leave league");
+    if (!res.ok) throw new Error("Failed to leave league");
 
-      // ✅ Update state locally instead of full page reload
-      setLeagues(prevLeagues => prevLeagues.filter(l => l.id !== leagueId));
+    // Remove the league from the local leagues state
+    setLeagues(prevLeagues => prevLeagues.filter(l => l.id !== leagueId));
 
-      // ✅ Close modal
-      setShowLeagueDetails(false);
-      setSelectedLeague(null);
+    // Close the modal
+    setShowLeagueDetails(false);
 
-      console.log("Successfully left league:", leagueId);
-    }
-    catch (err) {
-      console.error(err);
-    }
-  };
+    // Clear the selected league
+    setSelectedLeague(null);
+
+    console.log("Successfully left league:", leagueId);
+  } catch (err) {
+    console.error(err);
+  }
+};
 
 
   const openLeagueDetails = (league) => {
@@ -595,10 +609,12 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
             <div className="mb-4">
               <p className="text-purple-200 mb-2">League Code:</p>
               <div className="flex items-center justify-between bg-white/10 p-2 rounded-lg border border-white/20">
-                <span className="text-white">{leagueCode}</span>
-                <span className="text-white">{leagueCode}</span>
-                <button onClick={() => copyToClipboard(leagueCode, 'code')}>
-                  {copiedCode ? 'Copied!' : 'Copy'}
+                <span className="text-white text-sm truncate">{leagueCode}</span>
+                <button 
+                  onClick={() => copyToClipboard(leagueCode, 'code')}
+                  className="text-purple-300 hover:text-white"
+                  >
+                    {copiedCode ? 'Copied!' : 'Copy'}
                 </button>
               </div>
             </div>
