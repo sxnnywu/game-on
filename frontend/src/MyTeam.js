@@ -42,18 +42,18 @@ const MyTeam = ({ userId, leagueId, teamId }) => {
   useEffect(() => {
     const fetchTeamID = async () => {
       try {
-        
+
       } catch (err) {
         console.error("Error fetching team ID:", err);
         setError(err.message);
       }
-      
-      
+
+
     }
     const fetchTeamData = async () => {
       console.log("Starting fetch for teamId! userId:", userId, "leagueId:", leagueId);
       const response = await fetch(`https://game-on-9bhv.onrender.com/api/teams/getTeamID/${leagueId}/${userId}`);
-      if (!response) throw new Error ("pulling team id failed");
+      if (!response) throw new Error("pulling team id failed");
       const teamIDJson = await response.json();
       teamId = teamIDJson.id;
       console.log("fetch complete. teamId is: ", teamId);
@@ -199,15 +199,15 @@ const MyTeam = ({ userId, leagueId, teamId }) => {
             {/* Player Avatar */}
             <div className="relative">
               <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg bg-gradient-to-br ${player.position === 'G' ? 'from-orange-400 to-orange-600' :
-                  player.position === 'D' ? 'from-blue-400 to-blue-600' :
-                    'from-green-400 to-green-600'
+                player.position === 'D' ? 'from-blue-400 to-blue-600' :
+                  'from-green-400 to-green-600'
                 } shadow-lg`}>
                 {player.name ? player.name.split(' ').map(n => n[0]).join('') : 'NA'}
               </div>
               {/* Position badge */}
               <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white shadow-sm ${player.position === 'G' ? 'bg-orange-500' :
-                  player.position === 'D' ? 'bg-blue-500' :
-                    'bg-green-500'
+                player.position === 'D' ? 'bg-blue-500' :
+                  'bg-green-500'
                 }`}>
                 {player.position || 'F'}
               </div>
@@ -316,19 +316,32 @@ const MyTeam = ({ userId, leagueId, teamId }) => {
       {/* Header */}
       <div className="relative z-10 bg-white/5 backdrop-blur-sm border-b border-white/10">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <Zap className="w-10 h-10 text-white animate-pulse" />
-              <div className="absolute -top-1 -right-1 w-4 h-4 bg-purple-500 rounded-full flex items-center justify-center">
-                <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+          {/* Left: Logo + Title + Dashboard link */}
+          <div className="flex items-center space-x-6">
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <Zap className="w-10 h-10 text-white animate-pulse" />
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-purple-500 rounded-full flex items-center justify-center">
+                  <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                </div>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-white">
+                  PUCK<span className="text-purple-300"> YEAH!</span>
+                </h1>
+                <p className="text-purple-200 text-sm">My Team</p>
               </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-white">PUCK<span className="text-purple-300"> YEAH!</span></h1>
-              <p className="text-purple-200 text-sm">My Team</p>
+
+            {/* Dashboard link now sits beside PUCK YEAH! */}
+            <div className="text-white font-bold text-xl">
+              <a href="/dashboard" className="hover:text-purple-300 transition-colors">
+                DASHBOARD
+              </a>
             </div>
           </div>
-          <div className="text-white text-bold text-xl"><a href="/dashboard">DASHBOARD</a></div>
+
+          {/* Right: Edit button */}
           <div className="flex items-center space-x-4">
             <button
               onClick={toggleEditMode}
