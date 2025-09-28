@@ -12,17 +12,15 @@ const MyTeam = ({ userId, leagueId, teamId }) => {
   const [hoveredPlayer, setHoveredPlayer] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentUserId, setCurrentUserId] = useState(UserId || null);
-
-  const decoded = jwtDecode(token);
+  const [currentUserId, setCurrentUserId] = useState(userId || null);
 
   useEffect(() => {
     if (!userId) {
-      const token = localStorage.getItem('token'); // or wherever you store your JWT
+      const token = localStorage.getItem('token');
       if (token) {
         try {
           const decoded = jwtDecode(token);
-          setCurrentUserId(decoded.id || decoded._id); // depends on your token structure
+          setCurrentUserId(decoded.id || decoded._id);
         } catch (err) {
           console.error("Failed to decode JWT:", err);
         }
