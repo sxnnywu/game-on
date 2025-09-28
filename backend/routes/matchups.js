@@ -67,20 +67,28 @@ router.get('/:id/score', async (req, res) => {
     }
 });
 
-// get all matchups for a league
-// Get all matchups for a league
-router.get('/league/:leagueId', async (req, res) => {
+// Get all matchups for a given user (across all leagues)
+router.get('/user/:userId', async (req, res) => {
   try {
-    const { leagueId } = req.params;
+    const userId = req.params.userId;
 
-    const matchups = await Matchup.find({ leagueId })
-      .populate('teamAId')
-      .populate('teamBId');
+    // find the user
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // get leagues the user is in
+    const leagueIds = user.leagues;
+    if (!leagueIds || leagueIds.length === 0) {
+      return res.status(200).json({ matchups: [] });
+    }
+
+    // find all matchups in those leagues
+    const matchups = await Matchup.find({ leagueId: { $in: leagueIds } });
 
     res.status(200).json({ matchups });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
 });
 
