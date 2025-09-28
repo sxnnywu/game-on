@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const Player = require('../models/Player');
 
-// GET /api/players
 // Get all players
 router.get('/', async (req, res) => {
   try {
@@ -10,25 +9,40 @@ router.get('/', async (req, res) => {
     res.json(players);
   } catch (err) {
     console.error('Error fetching players:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-router.post('/initialLoad', async (req, res) => {
+router.post('/load', async (req, res) => {
   try {
     await Player.updateMany({status: true}, {status: false})
-    const teams = await fetch('https://lscluster.hockeytech.com/feed/index.php?feed=modulekit&view=teamsbyseason&season_id=5&key=446521baf8c38984&client_code=pwhl')
-    
-    if (!teams.ok) {
+    const teamsRes = await fetch('https://lscluster.hockeytech.com/feed/index.php?feed=modulekit&view=teamsbyseason&season_id=5&key=446521baf8c38984&client_code=pwhl');
+
+    if (!teamsRes.ok) {
       return res.status(400).json({ error: 'Issue obtaining teams' });
     }
+
+    const teams = teamsRes.json();
     
     //for each team
     teams.Teamsbyseason.forEach(async team => {
-      const roster = await fetch(`https://lscluster.hockeytech.com/feed/index.php?feed=modulekit&view=roster&team_id=${team.team_id}&season_id=7&key=446521baf8c38984&client_code=pwhl`);
+      const rosterRes = await fetch(`https://lscluster.hockeytech.com/feed/index.php?feed=modulekit&view=roster&team_id=${team.team_id}&season_id=7&key=446521baf8c38984&client_code=pwhl`);
       
+      if (!rosterRes.ok) {
+        return res.status(400).json({ error: 'Issue obtaining teams' });
+      }
+
+      const roster = rosterRes.json();
+
       roster.Roster.forEach(async playerProfile => {
-        const playerStats = await fetch(`https://lscluster.hockeytech.com/feed/index.php?feed=modulekit&view=player&category=mostrecentseasonstats&player_id=${playerProfile.player_id}&key=446521baf8c38984&client_code=pwhl`);
+        const playerStatsRes = await fetch(`https://lscluster.hockeytech.com/feed/index.php?feed=modulekit&view=player&category=mostrecentseasonstats&player_id=${playerProfile.player_id}&key=446521baf8c38984&client_code=pwhl`);
+
+        if (!playerStatsRes.ok) {
+          return res.status(400).json({ error: 'Issue obtaining teams' });
+        }
+
+        const playerStats = playerStatsRes.json();
+
 
         player = Player.findOne({pwhlSystemID: playerProfile.player_id});
         let isGoalie = false;
@@ -87,6 +101,8 @@ router.post('/initialLoad', async (req, res) => {
 
       });
     });
+
+    return res.status(200).json({message: "woo! done!"});
 
   } catch {
     console.error('Error fetching players:', err);
