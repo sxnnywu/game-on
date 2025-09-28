@@ -31,7 +31,7 @@ const GeminiWidget = () => {
     <div className={`gemini-fab-container ${expanded ? 'expanded' : ''}`}>
       <button className="gemini-fab" onClick={toggleExpanded}>
         <span><img src="/assets/MrPuck.png" alt="MrPuck" width={40} height={40}/></span>
-        <span className="fab-label">Hear Mr. Puck's Commentary</span>
+        <span className="fab-label">Hear Ms. Puck's Commentary</span>
       </button>
 
       {expanded && (
