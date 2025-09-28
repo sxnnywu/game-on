@@ -129,6 +129,8 @@ const PlayerDraft = () => {
             <div className="text-purple-200 text-xs sm:text-sm">Player Draft</div>
           </div>
         </div>
+        <div className="text-white text-bold text-xl"><a href="/dashboard">DASHBOARD</a></div>
+        <div className="text-white text-bold text-xl"><a href="/myteam">MY TEAM</a></div>  
         <div className="flex items-center gap-3 sm:gap-4">
           <div className="flex items-center gap-2 text-white/80">
             <Users className="w-4 h-4" />
