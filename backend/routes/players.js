@@ -5,7 +5,7 @@ const Player = require('../models/Player');
 // Get all players
 router.get('/', async (req, res) => {
   try {
-    const players = await Player.find({status: "available"});
+    const players = await Player.find({status: true});
     res.json(players);
   } catch (err) {
     console.error('Error fetching players:', err);
@@ -22,7 +22,7 @@ router.post('/load', async (req, res) => {
       return res.status(400).json({ error: 'Issue obtaining teams' });
     }
 
-    const teams = teamsRes.json();
+    const teams = await teamsRes.json();
 
     console.log("teams: ", teams)
     
@@ -34,7 +34,7 @@ router.post('/load', async (req, res) => {
         return res.status(400).json({ error: 'Issue obtaining teams' });
       }
 
-      const roster = rosterRes.json();
+      const roster = await rosterRes.json();
 
       console.log("roster: ", roster)
 
@@ -45,7 +45,7 @@ router.post('/load', async (req, res) => {
           return res.status(400).json({ error: 'Issue obtaining teams' });
         }
 
-        const playerStats = playerStatsRes.json();
+        const playerStats = await playerStatsRes.json();
 
         console.log("player: ", player)
 
