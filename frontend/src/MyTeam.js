@@ -289,10 +289,12 @@ const movePlayerToLineup = (player) => {
               </div>
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">Puck<span className="text-purple-300"> Yeah!</span></h1>
+              <h1 className="text-2xl font-bold text-white">PUCK<span className="text-purple-300"> YEAH!</span></h1>
               <p className="text-purple-200 text-sm">My Team</p>
             </div>
           </div>
+          <div className="text-white text-bold text-xl"><a href="/dashboard">DASHBOARD</a></div>
+          <div className="text-white text-bold text-xl"><a href="/myteam">MY TEAM</a></div>
           <div className="flex items-center space-x-4">
             <button
               onClick={toggleEditMode}
