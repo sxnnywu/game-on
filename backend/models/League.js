@@ -24,8 +24,8 @@ const leagueSchema = new mongoose.Schema({
         default: 'not_started'
     },
     currentTurn: {
-        type: mongoose.Schema.Types.ObjectId,
-        refPath: 'currentTurnModel' // could be User or Team
+        currentPick: {type: mongoose.Schema.Types.ObjectId, refPath: 'currentTurnModel'}, // could be User or Team
+        round: {type: Number}
     },
     currentTurnModel: {
         type: String,
