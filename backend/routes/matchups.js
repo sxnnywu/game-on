@@ -67,4 +67,21 @@ router.get('/:id/score', async (req, res) => {
     }
 });
 
+// get all matchups for a league
+// Get all matchups for a league
+router.get('/league/:leagueId', async (req, res) => {
+  try {
+    const { leagueId } = req.params;
+
+    const matchups = await Matchup.find({ leagueId })
+      .populate('teamAId')
+      .populate('teamBId');
+
+    res.status(200).json({ matchups });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 module.exports = router;
