@@ -18,11 +18,10 @@ const Temp = () => {
         }
     }
     return (
-        <div className="bg-black text-white">
-            TESTTESTTESTTEST
+        <div>
             <button onClick={getData} type="button" className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg sm:rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 flex items-center justify-center sm:justify-start gap-2 text-sm sm:text-base">
-                    click me to import players
-                </button>
+                click me to import players
+            </button>
         </div>
     );
 }
