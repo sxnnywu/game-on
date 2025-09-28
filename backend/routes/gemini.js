@@ -16,7 +16,7 @@ router.get('/', async (req, res) => {
   console.log('Received request to /api/gemini');
 
   const promptText = `
-    Say Hello!
+    current PWHL news (1 sentence only).
   `;
   console.log('Prompt text prepared');
 
@@ -37,7 +37,7 @@ router.get('/', async (req, res) => {
           ],
           generationConfig: {
             temperature: 0.7,
-            maxOutputTokens: 1000,
+            maxOutputTokens: 2000,
           }
         }),
       }
