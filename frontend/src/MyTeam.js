@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { jwtDecode } from 'jwt-decode';
 import { Users, Trophy, Edit3, Save, Zap, TrendingUp, TrendingDown } from 'lucide-react';
 
 const MyTeam = ({ userId, leagueId, teamId }) => {
@@ -11,6 +12,23 @@ const MyTeam = ({ userId, leagueId, teamId }) => {
   const [hoveredPlayer, setHoveredPlayer] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentUserId, setCurrentUserId] = useState(UserId || null);
+
+  const decoded = jwtDecode(token);
+
+  useEffect(() => {
+    if (!userId) {
+      const token = localStorage.getItem('token'); // or wherever you store your JWT
+      if (token) {
+        try {
+          const decoded = jwtDecode(token);
+          setCurrentUserId(decoded.id || decoded._id); // depends on your token structure
+        } catch (err) {
+          console.error("Failed to decode JWT:", err);
+        }
+      }
+    }
+  }, [userId]);
 
   // Animated puck movement
   useEffect(() => {
@@ -29,7 +47,7 @@ const MyTeam = ({ userId, leagueId, teamId }) => {
         setError("Missing team or league information");
         setLoading(false);   // stop loading spinner
         return;
-        }
+      }
 
 
       console.log("Fetching team data:", `https://game-on-9bhv.onrender.com/api/teams/${teamId}`);
@@ -87,7 +105,7 @@ const MyTeam = ({ userId, leagueId, teamId }) => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            userId,
+            userId: currentUserId,
             leagueId,
             players: lineupPlayerIds,
           }),
@@ -114,16 +132,16 @@ const MyTeam = ({ userId, leagueId, teamId }) => {
     setSelectedPlayer(null);
   };
 
-const movePlayerToLineup = (player) => {
-  if (lineup.length >= 23) { 
-    setError('Lineup is full (23 players max)');
-    return;
-  }
-  
-  setLineup(prev => [...prev, player]);
-  setBench(prev => prev.filter(p => (p._id || p.id) !== (player._id || player.id)));
-  setSelectedPlayer(null);
-};
+  const movePlayerToLineup = (player) => {
+    if (lineup.length >= 23) {
+      setError('Lineup is full (23 players max)');
+      return;
+    }
+
+    setLineup(prev => [...prev, player]);
+    setBench(prev => prev.filter(p => (p._id || p.id) !== (player._id || player.id)));
+    setSelectedPlayer(null);
+  };
 
 
   const movePlayerToBench = (player) => {
@@ -135,12 +153,11 @@ const movePlayerToLineup = (player) => {
   const PlayerCard = ({ player, isInLineup = false }) => {
     const playerId = player._id || player.id;
     const isSelected = selectedPlayer && (selectedPlayer._id || selectedPlayer.id) === playerId;
-    
+
     return (
-      <div 
-        className={`bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 transition-all duration-300 transform hover:scale-105 hover:bg-white/20 cursor-pointer group relative overflow-hidden ${
-          editMode ? 'hover:border-purple-400' : ''
-        } ${isSelected ? 'ring-2 ring-purple-400' : ''}`}
+      <div
+        className={`bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 transition-all duration-300 transform hover:scale-105 hover:bg-white/20 cursor-pointer group relative overflow-hidden ${editMode ? 'hover:border-purple-400' : ''
+          } ${isSelected ? 'ring-2 ring-purple-400' : ''}`}
         onClick={() => {
           if (editMode) {
             if (isSelected) {
@@ -157,29 +174,27 @@ const movePlayerToLineup = (player) => {
       >
         {/* Hover glow effect */}
         <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-        
+
         {/* Player info */}
         <div className="relative z-10">
           <div className="flex items-center space-x-3 mb-3">
             {/* Player Avatar */}
             <div className="relative">
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg bg-gradient-to-br ${
-                player.position === 'G' ? 'from-orange-400 to-orange-600' :
-                player.position === 'D' ? 'from-blue-400 to-blue-600' :
-                'from-green-400 to-green-600'
-              } shadow-lg`}>
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg bg-gradient-to-br ${player.position === 'G' ? 'from-orange-400 to-orange-600' :
+                  player.position === 'D' ? 'from-blue-400 to-blue-600' :
+                    'from-green-400 to-green-600'
+                } shadow-lg`}>
                 {player.name ? player.name.split(' ').map(n => n[0]).join('') : 'NA'}
               </div>
               {/* Position badge */}
-              <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white shadow-sm ${
-                player.position === 'G' ? 'bg-orange-500' :
-                player.position === 'D' ? 'bg-blue-500' :
-                'bg-green-500'
-              }`}>
+              <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white shadow-sm ${player.position === 'G' ? 'bg-orange-500' :
+                  player.position === 'D' ? 'bg-blue-500' :
+                    'bg-green-500'
+                }`}>
                 {player.position || 'F'}
               </div>
             </div>
-            
+
             <div className="flex-1 min-w-0">
               <h3 className="text-white font-bold text-sm mb-1 group-hover:text-purple-200 transition-colors truncate">
                 {player.name || 'Unknown Player'}
@@ -267,14 +282,14 @@ const movePlayerToLineup = (player) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 relative overflow-hidden">
-      
+
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 left-0 w-full h-px bg-white opacity-10 transform rotate-12"></div>
         <div className="absolute top-3/4 left-0 w-full h-px bg-white opacity-10 transform -rotate-12"></div>
         <div className="absolute top-20 left-20 w-8 h-8 bg-white rounded-full opacity-5 animate-bounce"></div>
         <div className="absolute bottom-32 right-32 w-6 h-6 bg-white rounded-full opacity-5 animate-ping"></div>
-        <div 
+        <div
           className="absolute top-1/3 w-4 h-4 bg-white rounded-full opacity-20 transition-all duration-100"
           style={{ left: `${puckPosition}%` }}
         ></div>
@@ -300,11 +315,10 @@ const movePlayerToLineup = (player) => {
             <button
               onClick={toggleEditMode}
               disabled={loading}
-              className={`px-4 py-2 rounded-xl font-semibold transition-all duration-300 ${
-                editMode 
-                  ? 'bg-green-600 text-white hover:bg-green-500' 
+              className={`px-4 py-2 rounded-xl font-semibold transition-all duration-300 ${editMode
+                  ? 'bg-green-600 text-white hover:bg-green-500'
                   : 'bg-purple-600 text-white hover:bg-purple-500'
-              } disabled:opacity-50`}
+                } disabled:opacity-50`}
             >
               {editMode ? (
                 <div className="flex items-center space-x-2">
@@ -332,7 +346,7 @@ const movePlayerToLineup = (player) => {
       )}
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
-        
+
         {/* Team Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-fade-in">
           <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 text-center transform hover:scale-105 transition-all duration-300">
@@ -354,7 +368,7 @@ const movePlayerToLineup = (player) => {
 
         {/* Main Grid */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-          
+
           {/* Lineup Section */}
           <div className="xl:col-span-2">
             <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 animate-slide-up">
@@ -365,7 +379,7 @@ const movePlayerToLineup = (player) => {
                 </h2>
                 <span className="text-purple-200 text-sm">{lineup.length}/23 players</span>
               </div>
-              
+
               {lineup.length === 0 ? (
                 <div className="text-center py-12">
                   <Users className="w-16 h-16 text-purple-400 mx-auto mb-4 opacity-50" />
@@ -393,7 +407,7 @@ const movePlayerToLineup = (player) => {
                 <Users className="w-6 h-6 mr-3 text-purple-300" />
                 Bench
               </h2>
-              
+
               {bench.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-purple-200">No bench players</p>

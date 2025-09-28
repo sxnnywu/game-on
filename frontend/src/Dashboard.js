@@ -22,7 +22,7 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
   const [matchups, setMatchups] = useState([]);
   const navigate = useNavigate();
 
-  {/* Background - Animated Puck Movement */}
+  {/* Background - Animated Puck Movement */ }
   useEffect(() => {
     const interval = setInterval(() => {
       setPuckPosition(prev => (prev + 1) % 100);
@@ -30,7 +30,7 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
     return () => clearInterval(interval);
   }, []);
 
-  {/* UserID MongoDB Token */}
+  {/* UserID MongoDB Token */ }
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
@@ -44,12 +44,12 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
     }
   }, []);
 
-  {/* Current User */}
+  {/* Current User */ }
   useEffect(() => {
     console.log("Current user in dashboard:", currentUser);
   }, [currentUser]);
 
-  { /* Creating League on MongoDB */}
+  { /* Creating League on MongoDB */ }
   const createLeagueInDB = async () => {
     if (!leagueName.trim() || !currentUser) return;
     const leagueData = {
@@ -77,7 +77,7 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
           name: data.name,
           members: 0,
           maxMembers: data.maxMembers || 12,
-          code: idAsCode, 
+          code: idAsCode,
           isOwner: true
         }
       ]);
@@ -94,7 +94,7 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
     }
   };
 
-  {/* Joining a League */}
+  {/* Joining a League */ }
   const joinLeague = async () => {
     if (!currentUser || !joinCode.trim()) return;
     // Check if user is already in this league
@@ -146,7 +146,7 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
     }
   };
 
-  {/* Leaving a League */}
+  {/* Leaving a League */ }
   const leaveLeague = async (leagueId) => {
     if (!currentUser) return;
     try {
@@ -172,7 +172,7 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
     }
   };
 
-  {/* League Details */}
+  {/* League Details */ }
   const openLeagueDetails = (league) => {
     setSelectedLeague(league);
     setLeagueId(league.id);
@@ -180,7 +180,7 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
     setShowLeagueDetails(true);
   };
 
-  {/* Copying to Clipboard */}
+  {/* Copying to Clipboard */ }
   const copyToClipboard = (text, type) => {
     navigator.clipboard.writeText(text);
     if (type === 'code') {
@@ -192,13 +192,13 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
     }
   };
 
-  {/* Logout */}
+  {/* Logout */ }
   const handleLogout = () => {
     localStorage.removeItem('token');
     navigate('/');
   };
 
-  {/* Fetch Leagues from Backend */}
+  {/* Fetch Leagues from Backend */ }
   useEffect(() => {
     const fetchLeagues = async () => {
       if (!currentUser || !token) return;
@@ -215,7 +215,7 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
           id: league._id,
           name: league.name,
           members: league.teamIds?.length || 0,
-          maxMembers: league.maxMembers || 12, 
+          maxMembers: league.maxMembers || 12,
           code: league.code || league._id.substring(0, 6).toUpperCase(),
           isOwner: league.creatorId?._id === currentUser.id
         }));
@@ -228,7 +228,7 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
     fetchLeagues();
   }, [currentUser, token]);
 
-  {/* Fetch matchups from backend */}
+  {/* Fetch matchups from backend */ }
   useEffect(() => {
     const fetchMatchups = async () => {
       console.log("Fetching matchups for user:", currentUser);
@@ -350,6 +350,36 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
             </div>
           </div>
 
+          {/* My Leagues */}
+          <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 mb-8 animate-slide-up">
+            <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
+              <Trophy className="w-6 h-6 mr-3 text-purple-300" />
+              My Leagues
+            </h2>
+            <div className="space-y-4">
+              {leagues.map((league) => (
+                <div
+                  key={league.id}
+                  onClick={() => openLeagueDetails(league)}
+                  className="cursor-pointer bg-white/10 rounded-2xl p-4 border border-white/10 hover:bg-white/20 transition-all duration-300 transform hover:scale-105"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-semibold text-white flex items-center">
+                      {league.name}
+                      {league.isOwner && <Crown className="w-4 h-4 ml-2 text-yellow-400" />}
+                    </h3>
+                    <span className="text-xs text-purple-300 font-mono">{league.code}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-purple-200 text-sm">
+                      {league.members}/{league.maxMembers} members
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Create & Join League Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
 
@@ -410,36 +440,6 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
                   </button>
                 </div>
               </div>
-            </div>
-          </div>
-
-          {/* My Leagues */}
-          <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 mb-8 animate-slide-up">
-            <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
-              <Trophy className="w-6 h-6 mr-3 text-purple-300" />
-              My Leagues
-            </h2>
-            <div className="space-y-4">
-              {leagues.map((league) => (
-                <div
-                  key={league.id}
-                  onClick={() => openLeagueDetails(league)}
-                  className="cursor-pointer bg-white/10 rounded-2xl p-4 border border-white/10 hover:bg-white/20 transition-all duration-300 transform hover:scale-105"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-semibold text-white flex items-center">
-                      {league.name}
-                      {league.isOwner && <Crown className="w-4 h-4 ml-2 text-yellow-400" />}
-                    </h3>
-                    <span className="text-xs text-purple-300 font-mono">{league.code}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-purple-200 text-sm">
-                      {league.members}/{league.maxMembers} members
-                    </span>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
 
@@ -604,15 +604,21 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
               )}
               <button
                 onClick={() => leaveLeague(selectedLeague.id)}
-                className="px-4 py-2 rounded-lg bg-red-600 text-white"
+                className="px-4 py-2 rounded-lg bg-purple-600 text-white"
               >
-                Leave League
+              My Team
               </button>
               <button
-                onClick={() => setShowLeagueDetails(false)}
+                onClick={() => navigate('/myteam')}
                 className="px-4 py-2 rounded-lg bg-purple-600 text-white"
               >
                 Close
+              </button>
+              <button
+                onClick={() => setShowLeagueDetails(false)}
+                className="px-4 py-2 rounded-lg bg-red-600 text-white"
+              >
+                Leave League
               </button>
             </div>
           </div>
