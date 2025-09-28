@@ -141,6 +141,9 @@ router.post('/:id/leave', async (req, res) => {
     // Remove league from user's leagues array
     user.leagues = user.leagues.filter(id => id.toString() !== league._id.toString());
 
+    // Remove team from league
+    league.teamIds = league.teamIds.filter(id => id.toString() !== userId.toString());
+
     await user.save();
     res.json({ message: 'Left league successfully' });
   } 
