@@ -22,6 +22,7 @@ const PlayerDraft = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [token, setToken] = useState(null);
 
+  // set current user from token
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
@@ -35,20 +36,17 @@ const PlayerDraft = () => {
     }
   }, []);
 
+  // fetch players from backend
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
         setLoading(true);
-        console.log("loading is true");
         const response = await fetch(`https://game-on-9bhv.onrender.com/api/players`);
         
-        console.log("fetch complete");
         if (!response.ok) throw new Error("Failed to fetch players");
-        console.log("fetch okay");
         
         const data = await response.json();
-        console.log("json awaited");
-        console.log(data)
+        console.log("Fetched players:", data);
         
         setPlayers(data);
         setError(null);
@@ -59,7 +57,6 @@ const PlayerDraft = () => {
         setLoading(false);
       }
     };
-
     fetchPlayers();
   }, []);
 
@@ -111,7 +108,7 @@ const PlayerDraft = () => {
   }
 
   const draftNextStep = async ()  => {
-    const leagueID = currentUser.league[0];
+    const leagueID = currentUser.leagues[0];
     const response = await fetch(`https://game-on-9bhv.onrender.com/api/legaue/${leagueID}/draft`);
     const DraftInfo = response.json();
 
@@ -369,7 +366,7 @@ const PlayerDraft = () => {
         </div>
         <div></div>
         <div className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg sm:rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 flex items-center justify-center sm:justify-start gap-2 text-sm sm:text-base">
-          <button OnClick={draftNextStep()}>
+          <button onClick={draftNextStep}>
             Continue to Next Step
           </button>
           <Zap className="w-4 h-4" />
