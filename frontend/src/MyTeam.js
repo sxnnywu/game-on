@@ -23,6 +23,7 @@ const MyTeam = ({ userId, leagueId, teamId }) => {
   // Fetch team data from backend
   useEffect(() => {
     const fetchTeamData = async () => {
+      console.log("Starting fetch for teamId:", teamId, "leagueId:", leagueId);
       if (!teamId || !leagueId) {
         console.warn("Missing teamId or leagueId", { teamId, leagueId });
         setError("Missing team or league information");
@@ -75,6 +76,7 @@ const MyTeam = ({ userId, leagueId, teamId }) => {
     fetchTeamData();
   }, [teamId, leagueId]);
 
+  // Toggle edit mode and save lineup changes
   const toggleEditMode = async () => {
     if (editMode) {
       try {
