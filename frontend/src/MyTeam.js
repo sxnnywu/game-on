@@ -22,6 +22,7 @@ const MyTeam = ({ userId, leagueId, teamId }) => {
         try {
           const decoded = jwtDecode(token);
           setCurrentUserId(decoded.id || decoded._id);
+          userId = localStorage.getItem('userId');
         } catch (err) {
           console.error("Failed to decode JWT:", err);
         }
@@ -41,7 +42,7 @@ const MyTeam = ({ userId, leagueId, teamId }) => {
   useEffect(() => {
     const fetchTeamID = async () => {
       try {
-        console.log("Starting fetch for teamId:", teamId, "leagueId:", leagueId);
+        console.log("Starting fetch for teamId! userId:", userId, "leagueId:", leagueId);
         const response = await fetch(`https://game-on-9bhv.onrender.com/api/teams/getTeamID/${leagueId}/${userId}`);
         if (!response) throw new Error ("pulling team id failed");
         const teamIDJson = await response.json();

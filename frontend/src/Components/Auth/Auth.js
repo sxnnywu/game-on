@@ -63,6 +63,7 @@ const Auth = () => {
       }
       setError('');
       localStorage.setItem('token', data.token);
+      localStorage.setItem('userId', data.user.id)
       navigate('/dashboard');
     } catch (error) {
       console.error("Network error:", error);
