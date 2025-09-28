@@ -1,6 +1,6 @@
 import { jwtDecode } from 'jwt-decode';
 import React, { useState, useEffect } from 'react';
-import { Users, Trophy, Plus, Copy, Share2, Crown, Calendar, Target, Zap, Settings, LogOut } from 'lucide-react';
+import { Users, Trophy, Plus, Crown, Calendar, Target, Zap, Settings, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
@@ -18,6 +18,7 @@ const Dashboard = () => {
   const [showLeagueDetails, setShowLeagueDetails] = useState(false);
   const [selectedLeague, setSelectedLeague] = useState(null);
   const [joinCode, setJoinCode] = useState('');
+  const [leagues, setLeagues] = useState([]);
   const navigate = useNavigate();
 
   // Animated puck movement
@@ -40,6 +41,10 @@ const Dashboard = () => {
       }
     }
   }, []);
+
+  useEffect(() => {
+  console.log("Current user in dashboard:", currentUser);
+}, [currentUser]);
 
   const generateLeagueCode = () => {
     const code = Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -105,9 +110,11 @@ const Dashboard = () => {
   };
 
   const leaveLeague = async (leagueId) => {
+    console.log("Attempting to leave league with ID:", leagueId);
     if (!currentUser) return;
 
     try {
+      console.log("Sending leave request for league ID:", leagueId);
       const res = await fetch(
         `https://game-on-9bhv.onrender.com/api/leagues/${leagueId}/leave`,
         {
@@ -119,8 +126,10 @@ const Dashboard = () => {
           body: JSON.stringify({ userId: currentUser.id }),
         }
       );
+      console.log("Leave response:", res);
       if (!res.ok) throw new Error("Failed to leave league");
-    } catch (err) {
+    } 
+    catch (err) {
       console.error(err);
     }
   };
@@ -146,11 +155,37 @@ const Dashboard = () => {
     navigate('/');
   };
 
-  const mockLeagues = [
-    { id: 1, name: "Ice Queens League", members: 8, maxMembers: 12, code: "ICE2024", isOwner: true },
-    { id: 2, name: "Slap Shot Sisters", members: 6, maxMembers: 10, code: "SLAP99", isOwner: false },
-    { id: 3, name: "Power Play Pros", members: 12, maxMembers: 12, code: "PWR123", isOwner: false }
-  ];
+  // Fetch leagues from backend
+  useEffect(() => {
+  const fetchLeagues = async () => {
+    if (!currentUser || !token) return;
+
+    try {
+      const res = await fetch(`https://game-on-9bhv.onrender.com/api/leagues/${currentUser.id}/leagues`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (!res.ok) throw new Error('Failed to fetch leagues');
+      const data = await res.json();
+
+      // Map the backend league data to match the fields used in component
+      const mappedLeagues = data.leagues.map(league => ({
+        id: league._id,
+        name: league.name,
+        members: league.teamIds?.length || 0,
+        maxMembers: league.maxMembers || 12, // default if not stored
+        code: league.code || league._id.substring(0, 6).toUpperCase(), // fallback code
+        isOwner: league.creatorId?._id === currentUser.id
+      }));
+      setLeagues(mappedLeagues);
+    } 
+    catch (err) {
+      console.error(err);
+    }
+  };
+  fetchLeagues();
+}, [currentUser, token]);
 
   const mockMatchups = [
     { id: 1, opponent: "Sarah M.", date: "Oct 15", status: "upcoming", myScore: 0, opponentScore: 0 },
@@ -300,7 +335,7 @@ const Dashboard = () => {
               My Leagues
             </h2>
             <div className="space-y-4">
-              {mockLeagues.map((league) => (
+              {leagues.map((league) => (
                 <div
                   key={league.id}
                   onClick={() => openLeagueDetails(league)}
