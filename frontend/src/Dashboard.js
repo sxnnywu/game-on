@@ -364,6 +364,8 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
                 <p className="text-purple-200 text-sm">Welcome back, {currentUser ? currentUser.username : "User"}!</p>
               </div>
             </div>
+            <div className="text-white text-bold text-xl"><a href="/dashboard">DASHBOARD</a></div>
+            <div className="text-white text-bold text-xl"><a href="/myteam">MY TEAM</a></div>
             <div className="flex items-center space-x-4">
               <button className="p-2 text-purple-200 hover:text-white transition-colors">
                 <Settings className="w-5 h-5" />
