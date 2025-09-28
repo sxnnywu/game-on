@@ -31,11 +31,11 @@ const MyTeam = ({ userId, leagueId, teamId }) => {
         }
 
 
-      console.log("Fetching team data:", `https://game-on-9bhv.onrender.com/api/teams/${teamId}?leagueID=${leagueId}`);
+      console.log("Fetching team data:", `https://game-on-9bhv.onrender.com/api/teams/${teamId}`);
       setLoading(true);
 
       try {
-        const res = await fetch(`https://game-on-9bhv.onrender.com/api/teams/${teamId}?leagueID=${leagueId}`, {
+        const res = await fetch(`https://game-on-9bhv.onrender.com/api/teams/${teamId}?leagueID=${encodeURIComponent(leagueId)}`, {
           headers: { "Accept": "application/json" },
         });
 
