@@ -62,9 +62,11 @@ const PlayerDraft = () => {
 
   const filteredPlayers = players.filter(player => {
     const matchesSearch = player.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesPosition = selectedPosition === "all" || player.position === selectedPosition;
+    const playerPos = player.position.toLowerCase(); // normalize
+    const matchesPosition = selectedPosition === "all" || playerPos === selectedPosition.toLowerCase();
     return matchesSearch && matchesPosition;
   });
+
 
   const positions = [...new Set(players.map(p => p.position))];
 
