@@ -21,6 +21,7 @@ const PlayerDraft = () => {
   const [selectedPosition, setSelectedPosition] = useState("all");
   const [currentUser, setCurrentUser] = useState(null);
   const [token, setToken] = useState(null);
+  const [draftState, setDraftState] = useState(null);
 
   // set current user from token
   useEffect(() => {
@@ -60,14 +61,34 @@ const PlayerDraft = () => {
     fetchPlayers();
   }, []);
 
+  // fetch draft state
+  const fetchDraftState = async () => {
+    if (!currentUser) return;
+    const leagueID = currentUser.leagues[0];
+    try {
+      const response = await fetch(`https://game-on-9bhv.onrender.com/api/league/${leagueID}/draft`);
+      if (!response.ok) throw new Error("Failed to fetch draft state");
+
+      const data = await response.json();
+      setDraftState(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // fetch draft state
+  useEffect(() => {
+    if (!currentUser) return;
+    fetchDraftState();
+  }, [currentUser]);
+
+  // filter players based on search and position
   const filteredPlayers = players.filter(player => {
     const matchesSearch = player.name.toLowerCase().includes(searchTerm.toLowerCase());
     const playerPos = player.position.toLowerCase(); // normalize
     const matchesPosition = selectedPosition === "all" || playerPos === selectedPosition.toLowerCase();
     return matchesSearch && matchesPosition;
   });
-
-
   const positions = [...new Set(players.map(p => p.position))];
 
   const getStatusBadge = (status) => (
@@ -83,6 +104,7 @@ const PlayerDraft = () => {
       'Drafted': 'bg-purple-100 text-purple-800',
       'Reserved': 'bg-yellow-100 text-yellow-800'
     };
+
     return (
       <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-medium ${colors[draftStatus] || 'bg-gray-100 text-gray-800'}`}>
         {draftStatus}
@@ -108,13 +130,61 @@ const PlayerDraft = () => {
     );
   }
 
-  const draftNextStep = async () => {
+  // make a draft pick
+  const makeDraftPick = async (playerId) => {
+    if (!currentUser || !draftState) return;
+
     const leagueID = currentUser.leagues[0];
-    const response = await fetch(`https://game-on-9bhv.onrender.com/api/legaue/${leagueID}/draft`);
-    const DraftInfo = response.json();
+    const teamId = currentUser.teamId; // assuming you store the user's team
 
+    try {
+      const response = await fetch(`https://game-on-9bhv.onrender.com/api/league/${leagueID}/draft/pick`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ teamId, playerId })
+      });
 
-  }
+      const data = await response.json();
+
+      if (!response.ok) throw new Error(data.error || "Draft pick failed");
+
+      // update local state
+      setPlayers(prev => prev.map(p => {
+        if (p._id === playerId) {
+          const leagueId = currentUser.leagues[0];
+          const updatedDraftStatus = p.draftStatus.map(d =>
+            d.leagueId === leagueId ? { ...d, status: 'drafted' } : d
+          );
+          return { ...p, draftStatus: updatedDraftStatus };
+        }
+        return p;
+      }));
+
+      // refresh draft state
+      fetchDraftState();
+      console.log("Draft pick successful:", data);
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+    }
+  };
+
+  const draftNextStep = async () => {
+    if (!currentUser) return;
+    const leagueID = currentUser.leagues[0];
+
+    try {
+      const response = await fetch(`https://game-on-9bhv.onrender.com/api/league/${leagueID}/draft`);
+      if (!response.ok) throw new Error("Failed to fetch next draft step");
+      const data = await response.json();
+      setDraftState(data);
+      console.log("Next draft step:", data);
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+    }
+  };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 p-3 sm:p-4 lg:p-6">
@@ -237,7 +307,9 @@ const PlayerDraft = () => {
           {/* Mobile Card View */}
           <div className="block lg:hidden space-y-3">
             {filteredPlayers.map((player) => (
-              <div key={player._id} className="bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20">
+              <div key={player._id} className="bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20"
+                onClick={() => makeDraftPick(player._id)}
+              >
                 <div className="flex justify-between items-start mb-3">
                   <div>
                     <h3 className="font-semibold text-white text-base">{player.name}</h3>
@@ -301,6 +373,7 @@ const PlayerDraft = () => {
                     key={player._id}
                     className={`border-b border-white/5 hover:bg-white/5 transition-colors ${index % 2 === 0 ? 'bg-white/2' : ''
                       }`}
+                    onClick={() => makeDraftPick(player._id)}
                   >
                     <td className="px-2 sm:px-4 py-3 sm:py-4">
                       <div className="font-medium text-white">{player.name}</div>
