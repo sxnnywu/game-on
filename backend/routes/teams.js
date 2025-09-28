@@ -20,7 +20,7 @@ router.get('/getTeamID/:league/:user', async (req, res) => {
             return res.status(404).json({ error: 'Team not found' });
         }
 
-        res.status(200).json({ team });
+        res.status(200).json({id: team.id });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Server error' });

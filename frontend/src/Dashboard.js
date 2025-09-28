@@ -279,6 +279,7 @@ const Dashboard = ({ setLeagueId, setTeamId }) => {
   {/* My Team Storage */ }
   const goToMyTeam = (league) => {
     localStorage.setItem('leagueID', league.id);
+    localStorage.setItem("userID", currentUser.id);
     navigate('/myteam'); 
   };
 
