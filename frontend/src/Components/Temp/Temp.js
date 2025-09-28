@@ -3,7 +3,11 @@ const Temp = () => {
         e.preventDefault();
         try {
             console.log("fetching");
-            const response = await fetch("https://game-on-9bhv.onrender.com/api/players/load");
+            const response = await fetch("https://game-on-9bhv.onrender.com/api/players/load", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: null
+            })
             console.log("fetch complete");
             if (!response.ok) throw new Error("Failed to fetch players");
             console.log("fetch okay");

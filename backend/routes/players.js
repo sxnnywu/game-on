@@ -23,6 +23,8 @@ router.post('/load', async (req, res) => {
     }
 
     const teams = teamsRes.json();
+
+    console.log("teams: ", teams)
     
     //for each team
     teams.Teamsbyseason.forEach(async team => {
@@ -34,6 +36,8 @@ router.post('/load', async (req, res) => {
 
       const roster = rosterRes.json();
 
+      console.log("roster: ", roster)
+
       roster.Roster.forEach(async playerProfile => {
         const playerStatsRes = await fetch(`https://lscluster.hockeytech.com/feed/index.php?feed=modulekit&view=player&category=mostrecentseasonstats&player_id=${playerProfile.player_id}&key=446521baf8c38984&client_code=pwhl`);
 
@@ -43,6 +47,7 @@ router.post('/load', async (req, res) => {
 
         const playerStats = playerStatsRes.json();
 
+        console.log("player: ", player)
 
         player = Player.findOne({pwhlSystemID: playerProfile.player_id});
         let isGoalie = false;
@@ -53,7 +58,10 @@ router.post('/load', async (req, res) => {
         if(!player && playerProfile.rookie) {
           //insert rookie
           Player.insertOne({
+            name: playerProfile.name,
+            pwhlSystemID: playerProfile.player_id,
             team: team.code,
+            position: playerProfile.position,
             status: true,
             statsFromThisWeek: {goals: 0, assists: 0, saves: 0, shots: 0},
             stats: {goals: 0, assists: 0, saves: 0, shots: 0},
@@ -63,7 +71,10 @@ router.post('/load', async (req, res) => {
         } else if (!player && !playerProfile.rookie) {
           //update returning player
           Player.insertOne({
+            name: playerProfile.name,
+            pwhlSystemID: playerProfile.player_id,
             team: team.code,
+            position: playerProfile.position,
             status: true,
             statsFromThisWeek: {goals: 0, assists: 0, saves: 0, shots: 0},
             stats: {goals: 0, assists: 0, saves: 0, shots: 0},
